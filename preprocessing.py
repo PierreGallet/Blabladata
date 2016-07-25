@@ -3,7 +3,7 @@ from __future__ import print_function
 import os, urllib, json, shutil, sys, time, csv, re, codecs, unicodedata, glob
 from nltk.corpus import stopwords
 import pandas as pd
-from sklearn.preprocessing import MultiLabelBinarizer
+
 
 class prepocessing():
     """
@@ -91,6 +91,12 @@ class prepocessing():
 
     def get_number_of_classes(self):
         return len(self.label_index)
+
+
+    def get_classes_names(self):
+        raw_data = pd.read_csv(self.data_directory, sep=';')
+        labels = list(raw_data.label.drop_duplicates().dropna())
+        return labels
 
 
     def csv(self, word_label=False):

@@ -11,7 +11,7 @@ import sklearn.ensemble as ens
 import sklearn.neighbors as neighbors
 import sklearn.naive_bayes as nb
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split, StratifiedKFold
 
@@ -80,14 +80,15 @@ class machine_learning():
         print('...Model Saved...')
 
 
-    def predict(self):
+    def predict(self, target_names=None):
         self.pred = self.model.predict(self.X_val)
         self.accuracy = accuracy_score(self.y_val, self.pred)
         self.confusion_matrix = np.array(confusion_matrix(self.y_val, self.pred), dtype=float)
+        self.classification_report = classification_report(self.y_val, self.pred, target_names=target_names)
         print(self.pred)
         print('\n\n## FINISHED ##')
         print('\nresult for the ' + self.model_name + ' on validation set:')
-        print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage_training_time:', self.average_training_time)
+        print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage_training_time:', self.average_training_time, '\nclassification report', self.classification_report)
 
 
 if __name__ == '__main__':

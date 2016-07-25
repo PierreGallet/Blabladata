@@ -16,7 +16,7 @@ from keras.layers import Convolution1D, MaxPooling1D, AveragePooling2D, AverageP
 from keras.datasets import imdb
 from keras.utils.np_utils import accuracy
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.cross_validation import train_test_split, StratifiedKFold
 import pickle, time
 import matplotlib.pyplot as plt
@@ -125,7 +125,7 @@ class deep_learning():
             pass
 
 
-    def predict(self):
+    def predict(self, target_names=None):
         # compute prediction on validation set
         self.pred = self.model.predict(self.X_val, batch_size=self.batch_size)
 
@@ -149,7 +149,7 @@ class deep_learning():
 
         self.accuracy = accuracy_score(self.y_val_vector, self.pred_vector)
         self.confusion_matrix = np.array(confusion_matrix(self.y_val_vector, self.pred_vector), dtype=float)
-
+        self.classification_report = classification_report(self.y_val_vector, self.pred_vector, target_names=target_names)
         # self.ratio = {}
         # self.ratio['false_pos'] = (self.confusion_matrix[0, 1]/np.sum(self.confusion_matrix[0, :]))
         # self.ratio['false_neg'] = (self.confusion_matrix[1, 0]/np.sum(self.confusion_matrix[1, :]))
@@ -160,7 +160,7 @@ class deep_learning():
         print('\nresult for the cnn + lstm on validation set:')
         print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage time per epoch:', self.average_time_per_epoch)
         print('\nadditional metrics:')
-        print('history:', self.history.history)
+        print('history:', self.history.history, '\nclassification report:', self.classification_report)
 
 
     def test(self):

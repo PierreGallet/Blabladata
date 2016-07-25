@@ -12,8 +12,8 @@ import tfidf
 deep = False
 # dictionary that links machine learning models to their parameters
 ml_models = {}
-ml_models['reglog_l1'] = 1.0  # C
-# ml_models['reglog_l2'] = 1.0  # C
+# ml_models['reglog_l1'] = 1.0  # C
+ml_models['reglog_l2'] = 1.0  # C
 # ml_models['reglog_sgd'] = 0.0001  # alpha
 # ml_models['naive_bayes'] = ''
 # ml_models['decision_tree'] = 'gini'  # entropy
@@ -25,7 +25,7 @@ ml_models['reglog_l1'] = 1.0  # C
 
 
 # the inputs
-data_directory = './data/SFR/messages_formated.csv'
+data_directory = './data/SFR/messages_formated_cat.csv'
 new_directory = './sfr'
 
 # go from raw_data to a csv with 2 column sentence/label
@@ -47,7 +47,8 @@ if deep is True:
     dl.prepare_data(test_size=0.20, max_len=150)
     dl.build_lstm_cnn(max_len=150, filter_length=3, nb_filter=64, pool_length=2, lstm_output_size=70, number_of_classes=number_of_classes)
     dl.train(batch_size=30, nb_epoch=2)
-    dl.predict()
+    target_name = preprocessing.get_classes_names()
+    dl.predict(target_name)
     dl.get_plots()
 
 else:
@@ -62,4 +63,5 @@ else:
     for model_name, params in ml_models.items():
         ml.build(model_name, params)
         ml.train()
-        ml.predict()
+        target_name = preprocessing.get_classes_names()
+        ml.predict(target_name)

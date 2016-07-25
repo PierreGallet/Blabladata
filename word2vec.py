@@ -129,7 +129,7 @@ class word2vec():
                 lenght = len(sentence_formated)
                 sentences[i, :lenght] = sentence_formated[:lenght]
                 i += 1
-        print('there was', nb_unknown, 'unknown tokens out of', nb_token, 'total tokens, which account for', (nb_unknown / nb_token), '% of all tokens')
+        print('there was', nb_unknown, 'unknown tokens out of', nb_token, 'total tokens, which account for', int((float(nb_unknown) / float(nb_token))*100), '% of all tokens')
 
         with open(self.path_labels, 'r+') as f:
             lines = f.readlines()
