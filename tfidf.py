@@ -22,8 +22,8 @@ class tfidf():
 
     def __init__(self, directory):
         self.directory = directory
-        if not os.path.exists(self.directory+'/tmp'):
-            os.makedirs(self.directory+'/tmp')
+        if not os.path.exists('./tmp'):
+            os.makedirs('./tmp')
         if not os.path.exists(self.directory+'/input/tfidf'):
             os.makedirs(self.directory+'/input/tfidf')
 
@@ -39,7 +39,7 @@ class tfidf():
         vectorizer = TfidfVectorizer(encoding='utf8')
         vectorizer.fit(corpus)
 
-        with open(self.directory+'/tmp/tfidf.pk', 'wb') as f:
+        with open('./tmp/tfidf.pkl', 'wb') as f:
             pickle.dump(vectorizer, f)
 
         print('...tfidf computation ended')
@@ -64,7 +64,7 @@ class tfidf():
         self.path_labels_output = self.directory + '/input/tfidf/labels.npy'
 
         # we load the tfidf vectorizer
-        with open(self.directory+'/tmp/tfidf.pk', 'rb') as f:
+        with open('./tmp/tfidf.pkl', 'rb') as f:
             vectorizer = pickle.load(f)
         # we load the sentences data
         def myCorpus():
@@ -76,10 +76,10 @@ class tfidf():
         sentences = sentences.todense()
         sentences = np.asarray(sentences)  # size samples x lenght of vocabulary
 
-        print("shape before feature selection:", sentences.shape)
-        print("feature selection starting")
-        sentences = self.feature_selection(sentences, threshold=feature_selection_threshold)
-        print("shape after feature selection:", sentences.shape)
+        # print("shape before feature selection:", sentences.shape)
+        # print("feature selection starting")
+        # sentences = self.feature_selection(sentences, threshold=feature_selection_threshold)
+        # print("shape after feature selection:", sentences.shape)
 
         with open(self.path_labels, 'r+') as f:
             lines = f.readlines()

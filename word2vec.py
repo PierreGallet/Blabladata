@@ -36,10 +36,10 @@ class word2vec():
         """
         self.directory = directory
         try:
-            shutil.rmtree(self.directory+'/tmp')
+            shutil.rmtree('./tmp')
         except:
             pass
-        os.mkdir(self.directory+'/tmp')
+        os.mkdir('./tmp')
 
     def train(self, path_sentences, size=128, window=5, min_count=10):
         """
@@ -47,7 +47,7 @@ class word2vec():
         """
         sentences = LineSentence(path_sentences)
         model = Word2Vec(sentences, size=size, window=window, min_count=min_count)
-        model.save(self.directory+'/tmp/word2vec')
+        model.save('./tmp/word2vec')
         print('...word2vec training ended')
         return model
 
@@ -65,9 +65,9 @@ class word2vec():
         for word in index2word:
             index_dict[word] = index2word.index(word) + 1  # +1 to use index 0 as the unknown token or no token index
             word_vectors[word] = model[word]
-        with open(self.directory+'/tmp/index_dict.pk', 'wb') as f:
+        with open('./tmp/index_dict.pk', 'wb') as f:
             pickle.dump(index_dict, f)
-        with open(self.directory+'/tmp/word_vectors.pk', 'wb') as f:
+        with open('./tmp/word_vectors.pk', 'wb') as f:
             pickle.dump(word_vectors, f)
 
         print('lenght of dictionary (voc_dim):', len(index_dict))
@@ -78,13 +78,13 @@ class word2vec():
         self.index_dict = index_dict
         self.word_vectors = word_vectors
 
-        model = Word2Vec.load(self.directory+'/tmp/word2vec')
+        model = Word2Vec.load('./tmp/word2vec')
         emb_dim = model.vector_size
         voc_dim = len(self.index_dict)
         embedding_weights = np.zeros((voc_dim + 1, emb_dim))  # +1 to use index 0 as the unknown token or no token index
         for word, index in self.index_dict.items():
             embedding_weights[index, :] = self.word_vectors[word]
-        with open(self.directory+'/tmp/embedding_weights.pk', 'wb') as f:
+        with open('./tmp/embedding_weights.pk', 'wb') as f:
             pickle.dump(embedding_weights, f)
         print('shape of embedding weight matrix (voc_dim + 1, emb_dim):', embedding_weights.shape)
         return embedding_weights

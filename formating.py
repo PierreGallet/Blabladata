@@ -22,7 +22,7 @@ def formating_csv(path):
     progress_bar = '=>'
     i = 0
 
-    with open('./data/SFR/messages_formated_1june.csv', 'wb') as output:
+    with open('./data/SFR/messages_formated.csv', 'wb') as output:
         fieldnames = ['label', 'sentence', 'conversation', 'intervention_id']
         writer = csv.DictWriter(output,  fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
@@ -57,6 +57,62 @@ def formating_csv(path):
         print 'elapsed:', time.time()-start_time
     print('...formating ended')
 
+
+def formating_bonjour(path):
+    # on recupère les données brutes
+    raw_data = pd.read_csv(path, sep=';')
+    # print raw_data.head()
+
+    # on enleve tous ce qui nous interesse pas (on g)
+    cond = raw_data.apply(lambda row: pd.isnull(row['creator_name']) and pd.isnull(row['body']) == False and row['source_type'] == 'Dimelo Chat', axis=1)
+    raw_data = raw_data[cond]
+    progress_bar = '=>'
+    i = 0
+
+    with open('./data/SFR/messages_formated_bonjour.csv', 'wb') as output:
+        fieldnames = ['label', 'sentence', 'conversation', 'intervention_id']
+        writer = csv.DictWriter(output,  fieldnames=fieldnames, delimiter=';')
+        writer.writeheader()
+        i = 0
+        start_time = time.time()
+        for intervention in raw_data.intervention_id.drop_duplicates().dropna():
+            # on récupère que les données correspondant à cette intervention_id
+            subset = raw_data[raw_data.intervention_id == intervention]
+            # on recupere la categorie, l'intervention_id et les 5 premiers messages client
+            intervention_id = subset['intervention_id'].values[0]
+            results = subset['body'].values.tolist()[0:2]
+            results_all = '\n'.join(subset['body'].values.tolist())
+            issue = [r for r in results if len(r)<20]
+            if len(issue)>1:
+                issue = ' '.join(issue)
+            else:
+                pass
+
+            if i % int(len(raw_data.intervention_id.drop_duplicates())/100) == 0:
+                progress_bar = '=' + progress_bar
+                print '[ ' + str(int(i*100/len(raw_data.intervention_id.drop_duplicates()))) + '% ' + progress_bar + ' ]'
+            i += 1
+            # on ecrit tout ça dans un csv.
+            if len(issue)<30 and issue:
+                writer.writerow({'label': 'greetings', 'sentence': issue, 'conversation': results_all, 'intervention_id': intervention_id})
+        print 'elapsed:', time.time()-start_time
+    print('...formating ended')
+
+
+def concat_csv(paths, output):
+    """
+    concatenate all csv and keep only Dimelo Chat data
+    """
+    l = []
+    for path, sep in paths.items():
+        raw_data = pd.read_csv(path, sep=sep)
+        cond = raw_data.apply(lambda row: pd.isnull(row['body']) == False and row['source_type'] == 'Dimelo Chat', axis=1)
+        raw_data = raw_data[cond]
+        del raw_data['title']
+        l.append(raw_data)
+    pd.concat(l).to_csv(output, sep=';', index=False)
+
+
 def select_categories(path):
 
     raw_data = pd.read_csv(path, sep=';')
@@ -74,16 +130,25 @@ def select_categories(path):
             else:
                 print label, nb
                 subset = raw_data[raw_data.label == label]['sentence'].values
-                for issue in subset:
+                for issue in subset[:500]:
                     writer.writerow({'label': label, 'sentence': issue})
+            # elif label in ["Changer d'offre"]:
+            #     print label, nb
+            #     subset = raw_data[raw_data.label == label]['sentence'].values
+            #     for issue in subset:
+            #         writer.writerow({'label': label, 'sentence': issue})
 
 
 
 if __name__ == '__main__':
 
-    paths = ['./data/SFR/autres/messages_juillet.csv',
-             './data/SFR/autres/messages_22june.csv',
-             './data/SFR/autres/messages_janv_mars.csv',
-             './data/SFR/messages.csv']
-    # formating_csv('./data/SFR/messages.csv')
-    select_categories('./data/SFR/messages_formated.csv')
+    paths = {}
+    paths['./data/SFR/autres/messages_juillet.csv'] = ','
+    paths['./data/SFR/autres/messages_22june.csv'] = ','
+    paths['./data/SFR/autres/messages_janv_mars.csv'] = ','
+    # paths['./data/SFR/autres/messages_1june.csv'] = ';'
+    # concat_csv(paths, './data/SFR/messages_all.csv')
+
+    # formating_csv('./data/SFR/messages_all.csv')
+    formating_bonjour('./data/SFR/messages_all.csv')
+    # select_categories('./data/SFR/messages_formated.csv')

@@ -1,11 +1,13 @@
-import pickle
+# coding: utf8
+import pickle, operator
 import numpy as np
-import formating_csv
+import formating
 import preprocessing
 import word2vec
 import deep_learning
 import machine_learning
 import tfidf
+from sklearn.metrics.pairwise import cosine_similarity
 # np.set_printoptions(threshold='nan')
 # np.set_printoptions(suppress=True)
 
@@ -29,7 +31,7 @@ data_directory = './data/SFR/messages_formated_cat.csv'
 new_directory = './sfr'
 
 # go from raw_data to a csv with 2 column sentence/label
-# formating_csv.formating_csv('./data/SFR/messages.csv')
+# formating.formating_csv('./data/SFR/messages.csv')
 
 # preprocess the data within input/sentence.txt and input/label.txt
 preprocessing = preprocessing.prepocessing(data_directory, new_directory)
@@ -65,3 +67,20 @@ else:
         ml.train()
         target_name = preprocessing.get_classes_names()
         ml.predict(target_name)
+
+
+    # # test cosinus similarité
+    # with open('./sfr/input/tfidf/sentences.npy', 'rb') as sent:
+    #     sentences = np.array(np.load(sent))
+    #
+    # test_sentences = sentences[19]
+    # print test_sentences
+    # results = {}
+    # print sentences.shape[0]
+    # for k in range(sentences.shape[0]):
+    #     results[k] = float(cosine_similarity(test_sentences, sentences[k]))
+    # with open('./sfr/input/sentences.txt', 'rb') as text:
+    #     sentences = text.readlines()
+    #     print 'finding similar sentences to :', sentences[19]
+    #     for i, cosine_sim in sorted(results.items(), key=operator.itemgetter(1), reverse=True)[:10]:
+    #         print sentences[i]

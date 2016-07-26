@@ -71,11 +71,11 @@ class machine_learning():
         self.model.fit(self.X_train, self.y_train)
         self.average_training_time = (time.time() - start_time)
 
-        if not os.path.exists(self.directory+'/tmp/models_saved'):
-            os.makedirs(self.directory+'/tmp/models_saved')
+        if not os.path.exists('./tmp/models_saved'):
+            os.makedirs('./tmp/models_saved')
 
         print('...Saving model...')
-        with open(self.directory+'/tmp/models_saved/'+self.model_name+'.pkl', 'wb') as f:
+        with open('./tmp/models_saved/'+self.model_name+'.pkl', 'wb') as f:
             pickle.dump(self.model, f)
         print('...Model Saved...')
 

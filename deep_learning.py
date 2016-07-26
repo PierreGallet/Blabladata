@@ -65,7 +65,7 @@ class deep_learning():
 
     def build_lstm_cnn(self, max_len=100, filter_length=3, nb_filter=64, pool_length=2, lstm_output_size=70, number_of_classes=2):
         print('...Build model...')
-        with open(self.directory + '/tmp/embedding_weights.pk', 'rb') as weights_pk:
+        with open('./tmp/embedding_weights.pk', 'rb') as weights_pk:
             self.embedding_weights = np.array(pickle.load(weights_pk))   # size = voc_dim x emb_dim
             # print(weights[:10])
         self.voc_dim, self.emb_dim = self.embedding_weights.shape
@@ -108,15 +108,15 @@ class deep_learning():
 
         print('...Saving model...')
 
-        if not os.path.exists(self.directory+'/tmp/models_saved'):
-            os.makedirs(self.directory+'/tmp/models_saved')
+        if not os.path.exists('./tmp/models_saved'):
+            os.makedirs('./tmp/models_saved')
 
         try:
             print('starting saving weights')
-            self.model.save_weights(self.directory + '/tmp/models_saved/lstm_cnn_weights.h5')
+            self.model.save_weights('./tmp/models_saved/lstm_cnn_weights.h5')
             print('ending saving weights')
             model_saved = self.model.to_json()
-            with open(self.directory + '/tmp/models_saved/lstm_cnn.json', 'w+') as f:
+            with open('./tmp/models_saved/lstm_cnn.json', 'w+') as f:
                 print('starting saving model')
                 f.write(model_saved)
                 print('ending saving model')

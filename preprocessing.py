@@ -3,7 +3,52 @@ from __future__ import print_function
 import os, urllib, json, shutil, sys, time, csv, re, codecs, unicodedata, glob
 from nltk.corpus import stopwords
 import pandas as pd
+from nltk.stem.snowball import FrenchStemmer
 
+def parse_txt(txt):
+    """
+    Splits a string into an lean string without punctiation, carriage returns & stopwords.
+    """
+
+    punctuation = ['(', ')', ':', ';', '«', '»', ',', '-', '!', '.', '?', '/', '[', ']', '{', '}',
+                   '#', '"', '*', '-', "`", '"', '>>', '|', '/', '*', '•', ' ', "d'", "j'",
+                   "t'", "l'", "s'", "n'", "qu'", "c'"]
+
+    carriage_returns = ['\n', '\r\n']
+
+    word_regex = "^[a-zàâçéèêëîïôûùüÿñæœ/+ .-]+$"
+
+    stop_words_set = set()
+    stopwordsfile = stopwords.words('french')
+    for word in stopwordsfile:  # a stop word in each line
+        word = word.replace("\n", '')
+        word = word.replace("\r\n", '')
+        stop_words_set.add(word)
+
+    clean_txt = ''
+    words = txt.split()
+    for word in words:
+        # lower case
+        word = word.lower()
+        # remove punctuation & carriage returns
+        for punc in punctuation + carriage_returns:
+            word = word.replace(punc, ' ').strip(' ')
+        # check if it is normal letters
+        if not re.match(word_regex, word):
+            word = None
+        # stemming
+        stemmer = FrenchStemmer()
+        # word = stemmer.stem(word)
+        # remove stopwords
+        if word and (word not in stop_words_set) and (len(word) > 1):
+            try:
+                words = unicodedata.normalize('NFKD', unicode(word, 'utf-8')).encode('ASCII', 'ignore').split()
+                for word in words:
+                    if word and (word not in stop_words_set) and (len(word) > 1):
+                        clean_txt = clean_txt + stemmer.stem(word) + ' '
+            except:
+                pass
+    return clean_txt
 
 class prepocessing():
     """
@@ -45,7 +90,7 @@ class prepocessing():
         word_regex = "^[a-zàâçéèêëîïôûùüÿñæœ/+ .-]+$"
 
         stop_words_set = set()
-        stopwordsfile = stopwords.words('english')
+        stopwordsfile = stopwords.words('french')
         for word in stopwordsfile:  # a stop word in each line
             word = word.replace("\n", '')
             word = word.replace("\r\n", '')
@@ -62,24 +107,26 @@ class prepocessing():
             # check if it is normal letters
             if not re.match(word_regex, word):
                 word = None
+            # stemming
+            stemmer = FrenchStemmer()
+            # word = stemmer.stem(word)
             # remove stopwords
             if word and (word not in stop_words_set) and (len(word) > 1):
                 try:
                     words = unicodedata.normalize('NFKD', unicode(word, 'utf-8')).encode('ASCII', 'ignore').split()
                     for word in words:
                         if word and (word not in stop_words_set) and (len(word) > 1):
-                            clean_txt = clean_txt + word + ' '
+                            clean_txt = clean_txt + stemmer.stem(word) + ' '
                 except:
                     pass
         return clean_txt
-
 
     def label_indexing(self):
         """
         create a new csv with numerical label instead of words
         """
         raw_data = pd.read_csv(self.data_directory, sep=';')
-        labels = raw_data.label.drop_duplicates()
+        labels = raw_data.label.drop_duplicates().dropna()
         self.label_index = {}
         i = 0
         for label in labels:
