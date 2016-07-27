@@ -11,7 +11,7 @@ np.set_printoptions(suppress=True)
 
 script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
-threshold = 2
+threshold = 0.01
 
 # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
 with open(script_dir + '/tmp/models_saved/reglog_l2.pkl', 'rb') as f:
@@ -44,7 +44,7 @@ def parse_intent(text):
     if len(text) < 25 and re.search(bonjourPattern, text) is not None:
         intent = 'greetings'
         return intent, 1, True
-    elif len(text) < 50 and (phone_number or email):
+    elif len(text) < 250 and (phone_number or email):
         intent = 'give_info'
         return intent, 1, True
     else:
