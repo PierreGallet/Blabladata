@@ -11,8 +11,6 @@ np.set_printoptions(suppress=True)
 
 script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
-threshold = 0.01
-
 # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
 with open(script_dir + '/tmp/models_saved/reglog_l2.pkl', 'rb') as f:
     model = pickle.load(f)
@@ -20,10 +18,10 @@ with open(script_dir + '/tmp/tfidf.pkl', 'rb') as f:
     vectorizer = pickle.load(f)
 
 # we get labels names from the data that trained the model
-#data_directory = './data/SFR/messages_formated_cat.csv'
-#new_directory = './sfr'
-#preprocessing = preprocessing.prepocessing(data_directory, new_directory)
-#target_name = preprocessing.get_classes_names()
+data_directory = script_dir + '/data/SFR/messages_formated_cat.csv'
+new_directory = script_dir + '/sfr'
+preprocessing = preprocessing.prepocessing(data_directory, new_directory)
+target_name = preprocessing.get_classes_names()
 
 def parse_entitees(text):
     phone_number = ''
@@ -52,9 +50,10 @@ def parse_intent(text):
         text = parse_txt(text)
         text = np.asarray(vectorizer.transform([text]).todense())
         # we apply the model on our vectorized input
-        intent = "ELSE" #target_name[int(model.predict(text))]
+        intent = target_name[int(model.predict(text))]
         proba = model.predict_proba(text)[0][int(model.predict(text))]
         # we use our threshold to determine if we understood the client
+        threshold = 0.3
         if proba > threshold:
             comprehension = True
         else:
@@ -75,8 +74,8 @@ def create_output(intent, proba, comprehension, phone_number, email):
 
 if __name__ == '__main__':
 
-    #text = str(raw_input("Coucou"))
+    # text = "Je voudrais résilier mon abonnement SFR"
     text = sys.argv[1]
     phone_number, email = parse_entitees(text)
     intent, proba, comprehension = parse_intent(text)
-    create_output(intent, proba, comprehension, phone_number, email)
+    create_ou
