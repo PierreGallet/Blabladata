@@ -80,4 +80,4 @@ if __name__ == '__main__':
     text = sys.argv[1]
     phone_number, email = parse_entitees(text)
     intent, proba, comprehension = parse_intent(text)
-    create_ou
+    create_output(intent, proba, comprehension, phone_number, email)
