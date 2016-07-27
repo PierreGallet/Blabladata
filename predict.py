@@ -5,15 +5,18 @@ import pickle
 import numpy as np
 import re
 import json
+import os, sys
 np.set_printoptions(threshold='nan')
 np.set_printoptions(suppress=True)
+
+script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 threshold = 2
 
 # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
-with open('./tmp/models_saved/reglog_l2.pkl', 'rb') as f:
+with open(script_dir + '/tmp/models_saved/reglog_l2.pkl', 'rb') as f:
     model = pickle.load(f)
-with open('./tmp/tfidf.pkl', 'rb') as f:
+with open(script_dir + '/tmp/tfidf.pkl', 'rb') as f:
     vectorizer = pickle.load(f)
 
 # we get labels names from the data that trained the model
@@ -60,19 +63,20 @@ def parse_intent(text):
 
 def create_output(intent, proba, comprehension, phone_number, email):
     context = {}
-    context['comprehension'] = comprehension
+    context['ok'] = comprehension
     context['intent'] = intent
-    context['entitees'] = {}
-    context['entitees']['phone_number'] = phone_number
-    context['entitees']['email'] = email
-    print json.dumps(context, indent=4)
-    with open('output.json', 'wb') as f:
-        json.dump(context, f)
+    context['entities'] = {}
+    context['entities']['phone_number'] = phone_number
+    context['entities']['email'] = email
+    print json.dumps(context)
+    #with open('output.json', 'wb') as f:
+    #    json.dump(context, f)
 
 
 if __name__ == '__main__':
 
-    text = str(raw_input("Coucou"))
+    #text = str(raw_input("Coucou"))
+    text = sys.argv[1]
     phone_number, email = parse_entitees(text)
     intent, proba, comprehension = parse_intent(text)
     create_output(intent, proba, comprehension, phone_number, email)
