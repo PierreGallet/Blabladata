@@ -18,10 +18,12 @@ with open(script_dir + '/tmp/tfidf.pkl', 'rb') as f:
     vectorizer = pickle.load(f)
 
 # we get labels names from the data that trained the model
-data_directory = script_dir + '/data/SFR/messages_formated_cat.csv'
-new_directory = script_dir + '/sfr'
-preprocessing = preprocessing.prepocessing(data_directory, new_directory)
-target_name = preprocessing.get_classes_names()
+# data_directory = script_dir + '/data/SFR/messages_formated_cat.csv'
+# new_directory = script_dir + '/sfr'
+# preprocessing = preprocessing.prepocessing(data_directory, new_directory)
+# target_name = preprocessing.get_classes_names()
+
+target_name = ['Forfaits & Options', 'Evolution tarifaire', "Changer d'offre", 'Appels/Au-delà/Hors Forfait', 'Régul/Remboursement/Geste Co', 'SFR Presse', 'Demande résil - Raisons personnelles', 'Achat Services SMS+ Internet+', "Résiliation d'offre en cours", 'Infos Offres FIBRE']
 
 def parse_entitees(text):
     phone_number = ''
