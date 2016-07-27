@@ -1,3 +1,4 @@
 data/
 paraphrase_detection/
 sfr/
+*.pyc
