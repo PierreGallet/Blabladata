@@ -8,6 +8,8 @@ import json
 np.set_printoptions(threshold='nan')
 np.set_printoptions(suppress=True)
 
+threshold = 2
+
 # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
 with open('./tmp/models_saved/reglog_l2.pkl', 'rb') as f:
     model = pickle.load(f)
@@ -15,42 +17,41 @@ with open('./tmp/tfidf.pkl', 'rb') as f:
     vectorizer = pickle.load(f)
 
 # we get labels names from the data that trained the model
-data_directory = './data/SFR/messages_formated_cat.csv'
-new_directory = './sfr'
-preprocessing = preprocessing.prepocessing(data_directory, new_directory)
-target_name = preprocessing.get_classes_names()
+#data_directory = './data/SFR/messages_formated_cat.csv'
+#new_directory = './sfr'
+#preprocessing = preprocessing.prepocessing(data_directory, new_directory)
+#target_name = preprocessing.get_classes_names()
 
-def parse_entitees(input):
+def parse_entitees(text):
     phone_number = ''
     email = ''
 
     phonePattern = re.compile(r'(?P<phone>[0-9. ]{9,15})')
-    if re.search(phonePattern, input) is not None:
-        phone_number = re.search(phonePattern, input).group('phone')
+    if re.search(phonePattern, text) is not None:
+        phone_number = re.search(phonePattern, text).group('phone')
 
     emailPattern = re.compile(r'(?P<email>[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})')
-    if re.search(emailPattern, input) is not None:
-        email = re.search(emailPattern, input).group('email')
+    if re.search(emailPattern, text) is not None:
+        email = re.search(emailPattern, text).group('email')
     return phone_number, email
 
-def parse_intent(input):
-    phone_number, email = parse_entitees(input)
+def parse_intent(text):
+    phone_number, email = parse_entitees(text)
     bonjourPattern = re.compile(r'((.)?onjour|b(.)?njour|bo(.)?jour|bon(.)?our|bonj(.)?ur|bonjo(.)?r|bonjou(.)?)')
-    if len(input) < 25 and re.search(bonjourPattern, input) is not None:
+    if len(text) < 25 and re.search(bonjourPattern, text) is not None:
         intent = 'greetings'
         return intent, 1, True
-    elif len(input) < 50 and (phone_number or email):
+    elif len(text) < 50 and (phone_number or email):
         intent = 'give_info'
         return intent, 1, True
     else:
         # we preprocess and vectorize the input
-        input = parse_txt(input)
-        input = np.asarray(vectorizer.transform([input]).todense())
+        text = parse_txt(text)
+        text = np.asarray(vectorizer.transform([text]).todense())
         # we apply the model on our vectorized input
-        intent = target_name[int(model.predict(input))]
-        proba = model.predict_proba(input)[0][int(model.predict(input))]
+        intent = "ELSE" #target_name[int(model.predict(text))]
+        proba = model.predict_proba(text)[0][int(model.predict(text))]
         # we use our threshold to determine if we understood the client
-        threshold = 0.4
         if proba > threshold:
             comprehension = True
         else:
@@ -71,8 +72,7 @@ def create_output(intent, proba, comprehension, phone_number, email):
 
 if __name__ == '__main__':
 
-    input = "Bonjour Ayaz et Julien"
-    phone_number, email = parse_entitees(input)
-    intent, proba, comprehension = parse_intent(input)
-    print proba
+    text = str(raw_input("Coucou"))
+    phone_number, email = parse_entitees(text)
+    intent, proba, comprehension = parse_intent(text)
     create_output(intent, proba, comprehension, phone_number, email)
