@@ -65,6 +65,7 @@ def parse_intent(text):
 def create_output(intent, proba, comprehension, phone_number, email):
     context = {}
     context['ok'] = comprehension
+    context['accuracy'] = proba
     context['intent'] = intent
     context['entities'] = {}
     context['entities']['phone_number'] = phone_number
