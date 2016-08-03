@@ -35,11 +35,8 @@ class word2vec():
         directory is the working directory where will be stored the templates & models & dictionary & others matrix
         """
         self.directory = directory
-        try:
-            shutil.rmtree('./tmp')
-        except:
-            pass
-        os.mkdir('./tmp')
+        if not os.path.exists('./tmp'):
+            os.makedirs('./tmp')
 
     def train(self, path_sentences, size=128, window=5, min_count=10):
         """

@@ -6,79 +6,76 @@ import numpy as np
 import re
 import json
 import os, sys
+from ner.ner import get_parameters
+# import cosine_similarity
 np.set_printoptions(threshold='nan')
 np.set_printoptions(suppress=True)
 
 script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+os.chdir(script_dir)
 
-# we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
-with open(script_dir + '/tmp/models_saved/reglog_l2.pkl', 'rb') as f:
-    model = pickle.load(f)
-with open(script_dir + '/tmp/tfidf.pkl', 'rb') as f:
-    vectorizer = pickle.load(f)
 
-# we get labels names from the data that trained the model
-# data_directory = script_dir + '/data/SFR/messages_formated_cat.csv'
-# new_directory = script_dir + '/sfr'
-# preprocessing = preprocessing.prepocessing(data_directory, new_directory)
-# target_name = preprocessing.get_classes_names()
+def get_intent(sentence):
+    target_name = ['Forfaits & Options',
+                   'Evolution tarifaire',
+                   "Changer d'offre",
+                   'Appels/Au-delà/Hors Forfait',
+                   'Régul/Remboursement/Geste Co',
+                   'SFR Presse',
+                   'Demande résil - Raisons personnelles',
+                   'Achat Services SMS+ Internet+',
+                   "Résiliation d'offre en cours",
+                   'Infos Offres FIBRE']
 
-target_name = ['Forfaits & Options', 'Evolution tarifaire', "Changer d'offre", 'Appels/Au-delà/Hors Forfait', 'Régul/Remboursement/Geste Co', 'SFR Presse', 'Demande résil - Raisons personnelles', 'Achat Services SMS+ Internet+', "Résiliation d'offre en cours", 'Infos Offres FIBRE']
-
-def parse_entitees(text):
-    phone_number = ''
-    email = ''
-
-    phonePattern = re.compile(r'(?P<phone>[0-9. ]{9,15})')
-    if re.search(phonePattern, text) is not None:
-        phone_number = re.search(phonePattern, text).group('phone')
-
-    emailPattern = re.compile(r'(?P<email>[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})')
-    if re.search(emailPattern, text) is not None:
-        email = re.search(emailPattern, text).group('email')
-    return phone_number, email
-
-def parse_intent(text):
-    phone_number, email = parse_entitees(text)
-    bonjourPattern = re.compile(r'((.)?onjour|b(.)?njour|bo(.)?jour|bon(.)?our|bonj(.)?ur|bonjo(.)?r|bonjou(.)?)')
-    if len(text) < 25 and re.search(bonjourPattern, text) is not None:
-        intent = 'greetings'
-        return intent, 1, True
-    elif len(text) < 250 and (phone_number or email):
-        intent = 'give_info'
-        return intent, 1, True
+    # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
+    with open('./tmp/models_saved/reglog_l2.pkl', 'rb') as f:
+        model = pickle.load(f)
+    with open('./tmp/tfidf.pkl', 'rb') as f:
+        vectorizer = pickle.load(f)
+    # we preprocess and vectorize the input
+    text_vector = parse_txt(sentence)
+    text_vector = np.asarray(vectorizer.transform([text_vector]).todense())
+    # we apply the model on our vectorized input
+    intent = target_name[int(model.predict(text_vector))]
+    acc = model.predict_proba(text_vector)[0][int(model.predict(text_vector))]
+    # we use our threshold to determine if we understood the client
+    threshold = 0.25
+    if acc > threshold:
+        comprehension = True
     else:
-        # we preprocess and vectorize the input
-        text = parse_txt(text)
-        text = np.asarray(vectorizer.transform([text]).todense())
-        # we apply the model on our vectorized input
-        intent = target_name[int(model.predict(text))]
-        proba = model.predict_proba(text)[0][int(model.predict(text))]
-        # we use our threshold to determine if we understood the client
-        threshold = 0.3
-        if proba > threshold:
-            comprehension = True
-        else:
-            comprehension = False
-        return intent, proba, comprehension
+        comprehension = False
+    return intent, acc, comprehension
 
-def create_output(intent, proba, comprehension, phone_number, email):
+def create_output(sentence):
+    # get named entities (aka parameters)
+    context_ner = get_parameters(sentence)
+
+    # get intent
+    bonjourPattern = re.compile(r'((.)?onjour|b(.)?njour|bo(.)?jour|bon(.)?our|bonj(.)?ur|bonjo(.)?r|bonjou(.)?)|(.)?ello')
+    if len(sentence) < 25 and re.search(bonjourPattern, sentence) is not None:
+        intent = 'greetings'
+        intent, acc, comprehension = intent, 1, True
+
+    elif len(sentence) < 250 and (context_ner['phone'] != '' or context_ner['email'] != ''):
+        intent = 'give_info'
+        intent, acc, comprehension = intent, 1, True
+
+    else:
+        intent, acc, comprehension = get_intent(sentence)
+
+    # create output to send to javascript
     context = {}
     context['ok'] = comprehension
-    context['accuracy'] = proba
+    context['accuracy'] = acc
     context['intent'] = intent
-    context['entities'] = {}
-    context['entities']['phone_number'] = phone_number
-    context['entities']['email'] = email
-    print json.dumps(context)
-    #with open('output.json', 'wb') as f:
+    context['entities'] = context_ner
+    print json.dumps(context, indent=4)
+    # with open('output.json', 'wb') as f:
     #    json.dump(context, f)
 
 
 if __name__ == '__main__':
 
-    # text = "Je voudrais résilier mon abonnement SFR"
-    text = sys.argv[1]
-    phone_number, email = parse_entitees(text)
-    intent, proba, comprehension = parse_intent(text)
-    create_output(intent, proba, comprehension, phone_number, email)
+    # sentence = "Je m'appelle Maxime Le Dantec et j'ai payé 15€ en plus lors de ma précédente facture...! comment c'est possible?'"
+    sentence = sys.argv[1]
+    create_output(sentence)

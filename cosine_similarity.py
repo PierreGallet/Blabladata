@@ -1,12 +1,7 @@
 # coding: utf8
 import pickle, operator, os, json, time
 import numpy as np
-import formating
 import preprocessing
-import word2vec
-import deep_learning
-import machine_learning
-import tfidf
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 # np.set_printoptions(threshold='nan')
@@ -50,56 +45,84 @@ def vectorize_qa():
         np.save(f, sentences)
 
 
-def vectorize_input(input):
+def vectorize_input(text):
     with open('./tmp/tfidf.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
-    input = preprocessing.parse_txt(input)
-    input = np.asarray(vectorizer.transform([input]).todense())
-    return input
+    text = preprocessing.parse_txt(text)
+    text = np.asarray(vectorizer.transform([text]).todense())
+    return text
 
 # test cosinus similarité
-def similar_question(input):
-    output = {}
-    output['initial_question'] = input
-    with open('./tmp/models_saved/reglog_l2.pkl', 'rb') as f:
-        model = pickle.load(f)
+def similar_question(text):
+    """
+    compute cosine similarity between the input text and our database of question from client, linked to operator answers.
+    make a space of possible answers.
+    based on the three best intent prediction to decrease the size of the question DB
+    """
+    # we will get the similar question and related answer there
     similar_question = []
     associated_answer = []
+    similarity = []
+
+    # we load the model
+    with open('./tmp/models_saved/reglog_l2.pkl', 'rb') as f:
+        model = pickle.load(f)
+
+    # we load the question/answer database
     raw_data = pd.read_csv('./data/SFR/messages_formated_QA.csv', sep=';')
-    input = vectorize_input(input)
+
+    # we vectorize the input
+    text_vector = vectorize_input(text)
     target_name = preprocessing.get_classes_names('./data/SFR/messages_formated_cat.csv')
+
+    # we get the three best predictions for the intent
     intent = []
     proba = []
-    for index, prob in sorted(enumerate(model.predict_proba(input)[0]), key=operator.itemgetter(1), reverse=True)[:3]:
+    for index, acc in sorted(enumerate(model.predict_proba(text_vector)[0]), key=operator.itemgetter(1), reverse=True)[:3]:
         intent.append(target_name[int(index)])
-        proba.append(prob)
-    print 'intent detected à', proba, '%:', intent
+        proba.append(acc)
+    # print 'intent detected à', proba[0], '%:', intent[0]
+    # print 'intent detected à', proba[1], '%:', intent[1]
+    # print 'intent detected à', proba[2], '%:', intent[2]
+
+    # and we only take the relevant data from question/answer database, thanks to the index variable
     index = raw_data[raw_data['label'] == intent[0]].index.tolist()
     index.extend(raw_data[raw_data['label'] == intent[1]].index.tolist())
     index.extend(raw_data[raw_data['label'] == intent[2]].index.tolist())
+
+    # we also load the vectorized q/a database and we compute cosine similarity for every index.
     with open('./qa/sentences.npy', 'rb') as sent:
         sentences = np.array(np.load(sent))
     results = {}
-    print '...comparing with', len(index), 'past questions'
+    # print '...comparing with', len(index), 'past questions'
     start_time = time.time()
     for k in index:
-        results[k] = float(cosine_similarity(input.reshape(1,-1), sentences[k].reshape(1,-1)))
+        results[k] = float(cosine_similarity(text_vector.reshape(1,-1), sentences[k].reshape(1,-1)))
     run_time = time.time() - start_time
-    print '...elapsed :', run_time
+    # print '...elapsed :', run_time
+
+    to_be_deleted = "Etes-vous toujours là ? N'ayant pas de réponse de votre part, je vais devoir fermer la conversation afin de répondre aux autres demandes. N'hésitez pas à nous recontacter par chat si vous avez besoin."
+    # then we can append the 10 best results in ours lists, and then our json.
     for i, cosine_sim in sorted(results.items(), key=operator.itemgetter(1), reverse=True)[:10]:
         similar_question.append(raw_data['question'][i])
-        associated_answer.append(raw_data['answer'][i])
+        associated_answer.append(raw_data['answer'][i].replace(to_be_deleted, ''))
+        similarity.append(cosine_sim)
+    output = {}
+    output['initial_question'] = text
     output['questions'] = []
     output['answers'] = []
     output['intent'] = intent
     output['accuracy'] = proba
+    output['similarity'] = []
     for k in range(9):
         output['questions'].append(similar_question[k])
         output['answers'].append(associated_answer[k])
-    print json.dumps(output, indent=4)
+        output['similarity'].append(similarity[k])
+    # print json.dumps(output, indent=4)
+    return associated_answer, similarity, similar_question
 
 
 if __name__ == '__main__':
 
-    input = "Puis-je changer de carte sim"
-    similar_question(input)
+    text = "j'aimerais résilier mon Forfait"
+    similar_question(text)

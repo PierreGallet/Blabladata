@@ -5,6 +5,11 @@ from nltk.corpus import stopwords
 import pandas as pd
 from nltk.stem.snowball import FrenchStemmer
 
+def get_classes_names(data_directory):
+    raw_data = pd.read_csv(data_directory, sep=';')
+    labels = list(raw_data.label.drop_duplicates().dropna())
+    return labels
+
 def parse_txt(txt):
     """
     Splits a string into an lean string without punctiation, carriage returns & stopwords.

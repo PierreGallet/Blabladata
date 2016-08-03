@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Set these paths appropriately
+
+BIN=`pwd`/ner/tree_tagger/POS_tagging/bin
+CMD=`pwd`/ner/tree_tagger/POS_tagging/cmd
+LIB=`pwd`/ner/tree_tagger/POS_tagging/lib
+
+OPTIONS="-token -lemma -sgml"
+
+TAGGER=${BIN}/tree-tagger
+TOKENIZER=${CMD}/tokenize.pl
+ABBR_LIST=${LIB}/swahili-abbreviations
+PARFILE=${LIB}/swahili.par
+
+$TOKENIZER -a $ABBR_LIST $* |
+$TAGGER $OPTIONS $PARFILE

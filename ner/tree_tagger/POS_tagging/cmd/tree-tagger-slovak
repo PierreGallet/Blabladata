@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Set these paths appropriately
+
+BIN=`pwd`/ner/tree_tagger/POS_tagging/bin
+CMD=`pwd`/ner/tree_tagger/POS_tagging/cmd
+LIB=`pwd`/ner/tree_tagger/POS_tagging/lib
+
+OPTIONS="-token -lemma -sgml"
+
+TAGGER=${BIN}/tree-tagger
+TOKENIZER=${CMD}/utf8-tokenize.perl
+PARFILE=${LIB}/slovak-utf8.par
+
+$TOKENIZER $* |
+$TAGGER $OPTIONS $PARFILE
