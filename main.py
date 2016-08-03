@@ -35,7 +35,7 @@ new_directory = './sfr'
 
 # preprocess the data within input/sentence.txt and input/label.txt
 preprocessing = preprocessing.prepocessing(data_directory, new_directory)
-preprocessing.csv(word_label=True)
+preprocessing.csv2(word_label=True)
 number_of_classes = preprocessing.get_number_of_classes()
 
 if deep is True:

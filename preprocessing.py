@@ -176,6 +176,30 @@ class prepocessing():
                             labels.write(str(label)+'\n')
         print('...csv preprocessing ended')
 
+    def csv2(self, word_label=False):
+        """
+        works with a csv semi colon separated, with two field : label and sentence
+        store the result in the new_directory/input section in .txt format
+        """
+        with open(self.path_sentences, 'w+') as sentences:
+            with open(self.path_labels, 'w+') as labels:
+                with open(self.data_directory, 'rb') as f:
+                    reader = csv.DictReader(f, fieldnames=['label', 'question', 'answer'], delimiter=';')
+                    if word_label == True:
+                        label_index = self.label_indexing()
+                    i = 0
+                    for row in reader:
+                        if i == 0:
+                            i += 1
+                        else:
+                            txt = self.parse_txt(row['question'])
+                            if word_label == True:
+                                label = label_index[row['label']]
+                            else:
+                                label = row['label']
+                            sentences.write(txt+'\n')
+                            labels.write(str(label)+'\n')
+        print('...csv preprocessing ended')
 
     def txt_directory(self):
         """
