@@ -8,6 +8,10 @@ import deep_learning
 import machine_learning
 import tfidf
 from sklearn.metrics.pairwise import cosine_similarity
+# Import des classes de Maxime
+import csv_sfr
+import concatenate_csv
+import csv_stat
 # np.set_printoptions(threshold='nan')
 # np.set_printoptions(suppress=True)
 
@@ -19,22 +23,31 @@ ml_models['reglog_l2'] = 1.0  # C
 # ml_models['reglog_sgd'] = 0.0001  # alpha
 # ml_models['naive_bayes'] = ''
 # ml_models['decision_tree'] = 'gini'  # entropy
-# ml_models['random_forest'] = 5  # nb_estimator
+#ml_models['random_forest'] = 50  # nb_estimator
 # ml_models['bagging_reglog_l1'] = 5  # nb_estimator
 # ml_models['bagging_reglog_l2'] = 5  # nb_estimator
-# ml_models['svm_linear'] = 1.0  # C
+#ml_models['svm_linear'] = 1.0  # C
 # ml_models['knn'] = 5  # nb_neighbors
 
-
-# the inputs
-data_directory = './data/SFR/messages_formated_cat.csv'
+#Parameters
+data_directory = './data/SFR/rawdata'
+csv_concatenated = './data/SFR/csv_concatenated.csv'
+data_file= './data/SFR/messages_formatted.csv'
 new_directory = './sfr'
 
-# go from raw_data to a csv with 2 column sentence/label
-# formating.formating_csv('./data/SFR/messages.csv')
 
-# preprocess the data within input/sentence.txt and input/label.txt
-preprocessing = preprocessing.prepocessing(data_directory, new_directory)
+# # # Take a directory of .csv file, concatenate them, formate them
+# # #to a csv with 4 columns label;sentence;conversation;intervention_id
+# concatenation = concatenate_csv.concatenate_csv(data_directory)
+# concatenation.concatenate_csv(csv_concatenated)
+#
+# formatting = csv_sfr.csv_sfr(csv_concatenated)
+# formatting.problem_detection(3,lecture = False)
+# formatting.dataframe_to_csv(data_file)
+#
+#
+# # preprocess the data within input/sentence.txt and input/label.txt
+preprocessing = preprocessing.preprocessing(data_file, new_directory)
 preprocessing.csv2(word_label=True)
 number_of_classes = preprocessing.get_number_of_classes()
 
@@ -59,7 +72,7 @@ else:
     tfidf.train(new_directory+'/input/sentences.txt')
     tfidf.format_input(feature_selection_threshold=0.85)
 
-    # the models
+    #the models
     ml = machine_learning.machine_learning(new_directory)
     ml.prepare_data(test_size=0.20)
     for model_name, params in ml_models.items():

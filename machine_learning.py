@@ -54,7 +54,7 @@ class machine_learning():
         elif model_name == 'decision_tree':
             self.model = tree.DecisionTreeClassifier(criterion=params)
         elif model_name == 'random_forest':
-            self.model = ens.RandomForestClassifier(n_estimators=params, criterion='gini')
+            self.model = ens.RandomForestClassifier(n_estimators=params,max_features='sqrt',bootstrap=False)
         elif model_name == 'bagging_reglog_l1':
             self.model = ens.BaggingClassifier(base_estimator=linear.LogisticRegression(penalty='l1', C=0.5), n_estimators=params)
         elif model_name == 'bagging_reglog_l2':
@@ -77,7 +77,7 @@ class machine_learning():
         print('...Saving model...')
         with open('./tmp/models_saved/'+self.model_name+'.pkl', 'wb') as f:
             pickle.dump(self.model, f)
-        print('...Model Saved...')
+        print('...Model Saved...') # pourquoi aussi long de saver le modèle?
 
 
     def predict(self, target_names=None):

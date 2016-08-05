@@ -35,3 +35,5 @@ git push
 git reset --soft HEAD~1
 ```
 This will not erase your local directory (if you use --hard it will)
+
+* git reset <file> provoque l'action inverse de git add <file>, il désindexe le file et permet de prendre celui du HEAD. Cf https://git-scm.com/book/fr/v2/Utilitaires-Git-Reset-d%C3%A9mystifi%C3%A9

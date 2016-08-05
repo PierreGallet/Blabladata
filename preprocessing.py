@@ -4,11 +4,8 @@ import os, urllib, json, shutil, sys, time, csv, re, codecs, unicodedata, glob
 from nltk.corpus import stopwords
 import pandas as pd
 from nltk.stem.snowball import FrenchStemmer
-
-def get_classes_names(data_directory):
-    raw_data = pd.read_csv(data_directory, sep=';')
-    labels = list(raw_data.label.drop_duplicates().dropna())
-    return labels
+from datetime import datetime
+from string import maketrans
 
 def parse_txt(txt):
     """
@@ -55,7 +52,8 @@ def parse_txt(txt):
                 pass
     return clean_txt
 
-class prepocessing():
+
+class preprocessing():
     """
     lots of different methods to preprocess data
     """
@@ -69,8 +67,8 @@ class prepocessing():
             shutil.rmtree(self.new_directory)
         except:
             pass
-
         os.mkdir(self.new_directory)
+
         self.data_directory = data_directory
 
         os.mkdir(self.new_directory+'/input')
@@ -125,6 +123,32 @@ class prepocessing():
                 except:
                     pass
         return clean_txt
+
+    def parse_max (self,txt):
+        """ We create the dictionary from the labeled data """
+        # Input : Liste de 2-uple contenant (mail,label)
+        # 0utput : Dictionnaire = liste de 2-uple avec l'ensemble des mots de tous les mails (mot,count)
+
+        not_letters_or_digits =u'!"#%\'()*+,-./:;<=>?@[\]^_`{|}~1234567890'
+        empty = u' '*len(not_letters_or_digits)
+        trantab = maketrans(not_letters_or_digits,empty)
+        stemmer = FrenchStemmer()
+
+        a = txt.replace('\n',' ')
+        a = txt.translate(trantab) # On enleve la ponctuation
+        a = a.lower() # On met tout en minuscule
+        a = a.decode('utf-8', 'replace')
+        a = a.split() # On répartit selon les espaces
+        a = [stemmer.stem(word) for word in a]
+
+        a = [word for word in a if not word.isdigit()]
+        stop = stopwords.words('french')
+        a = [word for word in a if not (word in stop)]
+
+        a= ' '.join(a)
+        a = a.encode('utf-8', 'ignore')
+
+        return a
 
     def label_indexing(self):
         """
@@ -184,21 +208,28 @@ class prepocessing():
         with open(self.path_sentences, 'w+') as sentences:
             with open(self.path_labels, 'w+') as labels:
                 with open(self.data_directory, 'rb') as f:
-                    reader = csv.DictReader(f, fieldnames=['label', 'question', 'answer'], delimiter=';')
+                    reader = csv.DictReader(f, fieldnames=['label', 'sentence', 'a','b'], delimiter=';')
                     if word_label == True:
                         label_index = self.label_indexing()
                     i = 0
                     for row in reader:
-                        if i == 0:
-                            i += 1
+                        if row['sentence']=='' or row['label']=='':
+                            pass
                         else:
-                            txt = self.parse_txt(row['question'])
-                            if word_label == True:
-                                label = label_index[row['label']]
+                            if i == 0:
+                                i += 1
                             else:
-                                label = row['label']
-                            sentences.write(txt+'\n')
-                            labels.write(str(label)+'\n')
+                                txt = self.parse_max(row['sentence'])
+                                if word_label == True:
+                                    print(i)
+                                    print(pd.isnull(row['label']))
+                                    print(row['label'])
+                                    label = label_index[row['label']]
+                                    i+=1
+                                else:
+                                    label = row['label']
+                                sentences.write(txt+'\n')
+                                labels.write(str(label)+'\n')
         print('...csv preprocessing ended')
 
     def txt_directory(self):

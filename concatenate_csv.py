@@ -21,7 +21,6 @@ class concatenate_csv():
                 # first file:
                 if i==1:
                     with open(self.dossier+'/'+fn,"r") as csv1:
-                        print csv1
                         for raw in csv1:
                             final_csv.write(raw)
                 # now the rest:

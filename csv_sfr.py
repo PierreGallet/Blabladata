@@ -4,7 +4,6 @@ import numpy as np
 import csv
 import time, operator
 import os
-import concatenate_csv
 
 class csv_sfr():
 
@@ -50,7 +49,8 @@ class csv_sfr():
         print self.df.intervention_id.drop_duplicates().dropna().size
         i=0
         for intervention in self.df.intervention_id.drop_duplicates().dropna():
-            print i
+            if i%500:
+                print i
             # on récupère que les données correspondant à cette intervention_id
             subset = self.df[self.df.intervention_id == intervention]
             # on recupere la categorie, l'intervention_id et les 5 premiers messages client
@@ -85,11 +85,13 @@ class csv_sfr():
         self.df.to_csv(name,sep=';',index = False)
 
 if __name__ == '__main__':
-    dossier = './Scrapping_dimelo_juinjuillet'
-    #name = 'message_formated_juillet.csv'
-    test = csv_sfr('csv_concatenated.csv')
-    #test.concatenate_csv(dossier,name)
-    test.problem_detection(3,lecture = False)
-    test.dataframe_to_csv('message_formated_juillet.csv')
+    # dossier = './Scrapping_dimelo_juinjuillet'
+    # #name = 'message_formated_juillet.csv'
+    # test = csv_sfr('csv_concatenated.csv')
+    # #test.concatenate_csv(dossier,name)
+    # test.problem_detection(3,lecture = False)
+    # test.dataframe_to_csv('message_formated_juillet.csv')
     #print os.listdir('./csv_directory')
     #test.check_concat_work('csv_concatenated.csv',dossier)
+    df = pd.read_csv('./data/SFR/messages_formatted.csv',sep=';',low_memory=False)
+    df.to_csv('mess_formaté_index',sep=';',index = True)
