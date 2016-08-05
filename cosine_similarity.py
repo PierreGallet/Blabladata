@@ -121,8 +121,12 @@ def similar_question(text):
     # print json.dumps(output, indent=4)
     return associated_answer, similarity, similar_question
 
+def similarity(text1, text2):
+    text_vector_1 = vectorize_input(text1)
+    text_vector_2 = vectorize_input(text2)
+    print cosine_similarity(text_vector_1.reshape(1,-1), text_vector_2.reshape(1,-1))
 
 if __name__ == '__main__':
 
-    text = "j'aimerais résilier mon Forfait"
-    similar_question(text)
+    text = "je ne comprends pas"
+    similarity(text, "je ne vois pas")

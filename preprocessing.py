@@ -282,58 +282,7 @@ class preprocessing():
 
 if __name__ == '__main__':
 
-    ### for Deep learning ####
-    # datadir = './data/Stanford - IMDB review sentiment analysis dataset/ang/test'
-
-    # os.mkdir('./dl')
-    # os.mkdir('./dl/tmp')
-    # os.mkdir('./dl/tmp/models_saved')
-    # os.mkdir('./dl/input')
-    # os.mkdir('./dl/input/test')
-    # os.mkdir('./dl/input/formated')
-    # os.mkdir('./dl/input/formated/test')
-
-    # path_sentences = './dl/input/test/sentences.txt'
-    # path_labels = './dl/input/test/labels.txt'
-
-
-    # #### for Machine learning ####
-    # datadir = './data/kaggle - Bag of Words Meets Bags of Popcorn/train.csv'
-    #
-    # os.mkdir('./ml')
-    # os.mkdir('./ml/tmp')
-    # os.mkdir('./ml/tmp/models_saved')
-    # os.mkdir('./ml/input')
-    # os.mkdir('./ml/input/formated')
-    #
-    # path_sentences = './ml/input/sentences.txt'
-    # path_labels = './ml/input/labels.txt'
-
-    ### for Paraphrase detection ###
-    datadir = './data/MRPC/train.txt'
-    # try:
-    #     shutil.rmtree('./pd')
-    # except:
-    #     pass
-    # os.mkdir('./pd')
-    # os.mkdir('./pd/tmp')
-    # os.mkdir('./pd/tmp/models_saved')
-    # os.mkdir('./pd/input')
-    # os.mkdir('./pd/input/train')
-    # os.mkdir('./pd/input/test')
-    # os.mkdir('./pd/input/formated')
-    # os.mkdir('./pd/input/formated/train')
-    # os.mkdir('./pd/input/formated/test')
-
-    path_sentences = './pd/input/train/sentences.txt'
-    path_sentences_1 = './pd/input/train/sentences_1.txt'
-    path_sentences_2 = './pd/input/train/sentences_2.txt'
-    path_labels = './pd/input/train/labels.txt'
-
-    ################################
-    # if datadir.split('.')[-1] == 'csv':
-    #     preprocessing_csv(datadir, path_sentences, path_labels)
-    # else:
-    #     preprocessing_diroftxt(datadir, path_sentences, path_labels)
-
-    preprocessing_paraphrase(path_sentences, path_sentences_1, path_sentences_2, path_labels)
+    word = "à l'école des beaÿ are"
+    words = unicodedata.normalize('NFKD', unicode(word, 'utf-8')).encode('ASCII', 'ignore').split()
+    print(words)
+    print(parse_txt('écolier'))

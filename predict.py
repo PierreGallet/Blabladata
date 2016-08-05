@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 import re
 import json
-import os, sys
+import os, sys, unicodedata
 from ner.ner import get_parameters
 # import cosine_similarity
 np.set_printoptions(threshold='nan')
@@ -14,6 +14,10 @@ np.set_printoptions(suppress=True)
 script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(script_dir)
 
+def parse(sentence):
+    sentence = sentence.lower()
+    sentence = unicodedata.normalize('NFKD', unicode(sentence, 'utf-8')).encode('ASCII', 'ignore')
+    return sentence
 
 def get_intent(sentence):
     target_name = ['Forfaits & Options',
@@ -49,11 +53,16 @@ def get_intent(sentence):
 def create_output(sentence):
     # get named entities (aka parameters)
     context_ner = get_parameters(sentence)
-
+    sentence = parse(sentence)
     # get intent
-    bonjourPattern = re.compile(r'((.)?onjour|b(.)?njour|bo(.)?jour|bon(.)?our|bonj(.)?ur|bonjo(.)?r|bonjou(.)?)|(.)?ello')
-    if len(sentence) < 25 and re.search(bonjourPattern, sentence) is not None:
+    greetingPattern = re.compile(r'((.)?onjour|b(.)?njour|bo(.)?jour|bon(.)?our|bonj(.)?ur|bonjo(.)?r|bonjou(.)?)|(.)?ello|(.)?alut')
+    thanksPattern = re.compile(r'((.)?erci|mercis|thanks|thank you|thank)')
+    if len(sentence) < 25 and re.search(greetingPattern, sentence) is not None:
         intent = 'greetings'
+        intent, acc, comprehension = intent, 1, True
+
+    elif len(sentence) < 25 and re.search(thanksPattern, sentence) is not None:
+        intent = 'thanks'
         intent, acc, comprehension = intent, 1, True
 
     elif len(sentence) < 250 and (context_ner['phone'] != '' or context_ner['email'] != ''):
@@ -65,6 +74,7 @@ def create_output(sentence):
 
     # create output to send to javascript
     context = {}
+    context['message'] = sentence
     context['ok'] = comprehension
     context['accuracy'] = acc
     context['intent'] = intent

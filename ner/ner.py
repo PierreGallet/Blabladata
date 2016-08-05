@@ -154,6 +154,13 @@ class ner():
 
 def predict_entities(sentences):
 
+    translate_entities = {}
+    translate_entities['B-PER'] = 'person'
+    translate_entities['B-ORG'] = 'organisation'
+    translate_entities['B-MISC'] = 'miscellaneous'
+    translate_entities['B-LOC'] = 'location'
+
+
     # loading the tagger
     tagger = pycrfsuite.Tagger()
     tagger.open('./ner/ner.crfsuite')
@@ -171,7 +178,7 @@ def predict_entities(sentences):
             while i + j < len(name_entities) and name_entities[i+j] != 'O':
                 entity += sentences_tok[i+j] + ' '
                 j += 1
-            context[str(name_entities[i]) + ' at ' + str(i)] = entity.strip(' ')
+            context[translate_entities[name_entities[i]]] = entity.strip(' ')
             i = i + j
         else:
             i += 1
@@ -190,7 +197,7 @@ def regex_detection(sentences):
     phonePattern = re.compile(r'(?P<phone>(0|\+33)[-.\s]*[1-9]([-.\s]*[0-9]){8})')  # \s = [ \t\n\r\f\v]
     emailPattern = re.compile(r'(?P<email>[A-Za-z0-9._-]+@[A-Za-z0-9._-]{2,}\.[a-z]{2,10})')   #TODO: ajout de àâäçéèêëîïôöûùüÿñæœ ?
     datePattern = re.compile(r'(?P<date>[0-3][0-9][-/.\s]([0-9]){2}[-/.\s]([0-9]){2,4})')  # JJ/MM/AAAA
-    zipcodePattern = re.compile(r'(?P<zipcode>\s[0-9]{4,5}\s)')
+    zipcodePattern = re.compile(r'(?P<zipcode>[0-9]{4,5})')
     urlPattern = re.compile(r'(?P<url>((http|https|ftp):\/\/)?([-\w]*\.)?([-\w]*)\.(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|arpa|[a-z]{2,3})\/[-_\w\/=?]*(\.[\w]{2,8})?)')
     moneyPattern = re.compile(r'(?P<money>\s\d{,4}([,.€]\d{,2})?(\s)?(€|euros|euro|e|cent|cents|centimes|centime)?(\s)?(\d{,2})?\s)')
 
