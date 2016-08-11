@@ -2,9 +2,9 @@
 
 ## project folder organization
 
-There is 9 folders in the project:
+The project is organized through 9 folders:
 * ```/classifiers```, that groups the different machine learning & deep learning algorithms, using Keras & Sk-learn. There you can train, using data in a ```/data``` folder (that you have to create) and predict using a model from ```/tmp```.
-* ```/embeddings``, that groups TF-IDF, word2vec, doc2vec and others way to embed ours word vectors, using Gensim & NLTK
+* ```/embeddings```, that groups TF-IDF, word2vec, doc2vec and others way to embed ours word vectors, using Gensim & NLTK
 * ```/formatting```, that is there to format any data to a csv with 2 columns (label, sentence) that is our format to do supervised learning.
 * ```/preprocessing```, that process the raw words to the words that will be used for the embeddings part (part of dictionary, etc...)
 * ```/ner```, that groups all ner algorithms, using CRF Suite for python
