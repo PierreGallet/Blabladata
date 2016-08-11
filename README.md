@@ -1,5 +1,18 @@
 # Blabladata
 
+## project folder organization
+
+There is 9 folders in the project:
+* ```/classifiers```, that groups the different machine learning & deep learning algorithms, using Keras & Sk-learn. There you can train, using data in a ```/data``` folder (that you have to create) and predict using a model from ```/tmp```.
+* ```/embeddings``, that groups TF-IDF, word2vec, doc2vec and others way to embed ours word vectors, using Gensim & NLTK
+* ```/formatting```, that is there to format any data to a csv with 2 columns (label, sentence) that is our format to do supervised learning.
+* ```/preprocessing```, that process the raw words to the words that will be used for the embeddings part (part of dictionary, etc...)
+* ```/ner```, that groups all ner algorithms, using CRF Suite for python
+* ```/unsupervised```, that groups all unsupervised learning technics, for now : cosine similarity & kmeans.
+* ```/paraphrase_detection```, that groups paraphrase detection algorithms.
+* ```/misc```, that groups miscellaneous scripts
+* ```/tmp```, that groups all ours templates (models that are trained).
+
 ## dependencies
 
 * crfsuite from https://github.com/tpeng/python-crfsuite. See an example here : http://nbviewer.jupyter.org/github/tpeng/python-crfsuite/blob/master/examples/CoNLL%202002.ipynb
@@ -8,7 +21,12 @@
 * spacy
 * pandas
 * numpy
+* matplotlib
+* gensim
+* nltk
+* Levenshtein from https://pypi.python.org/pypi/python-Levenshtein. Do ```python setup.py build``` to create the executable binary, then ```python setup.py install``` to copy them in site_package (repo used by python for packages)
 
+les imports sont tous absolus: ils partent de ./Blabladata.
 
 ## git stuff
 
@@ -35,5 +53,3 @@ git push
 git reset --soft HEAD~1
 ```
 This will not erase your local directory (if you use --hard it will)
-
-* git reset <file> provoque l'action inverse de git add <file>, il désindexe le file et permet de prendre celui du HEAD. Cf https://git-scm.com/book/fr/v2/Utilitaires-Git-Reset-d%C3%A9mystifi%C3%A9

@@ -1,83 +1,42 @@
 # coding: utf-8
-from preprocessing import parse_txt
-import preprocessing
-import pickle
+from preprocessing.parse import parse_soft
+import pickle, re, json, os, sys, unicodedata
 import numpy as np
-import re
-import json
-import os, sys, unicodedata
-from ner.ner import get_parameters
-# import cosine_similarity
+from ner.predict import entities
+from classifiers.predict import intent
 np.set_printoptions(threshold='nan')
 np.set_printoptions(suppress=True)
 
 script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(script_dir)
 
-def parse(sentence):
-    sentence = sentence.lower()
-    sentence = unicodedata.normalize('NFKD', unicode(sentence, 'utf-8')).encode('ASCII', 'ignore')
-    return sentence
-
-def get_intent(sentence):
-    target_name = ['Forfaits & Options',
-                   'Evolution tarifaire',
-                   "Changer d'offre",
-                   'Appels/Au-delà/Hors Forfait',
-                   'Régul/Remboursement/Geste Co',
-                   'SFR Presse',
-                   'Demande résil - Raisons personnelles',
-                   'Achat Services SMS+ Internet+',
-                   "Résiliation d'offre en cours",
-                   'Infos Offres FIBRE']
-
-    # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
-    with open('./tmp/models_saved/reglog_l2.pkl', 'rb') as f:
-        model = pickle.load(f)
-    with open('./tmp/tfidf.pkl', 'rb') as f:
-        vectorizer = pickle.load(f)
-    # we preprocess and vectorize the input
-    text_vector = parse_txt(sentence)
-    text_vector = np.asarray(vectorizer.transform([text_vector]).todense())
-    # we apply the model on our vectorized input
-    intent = target_name[int(model.predict(text_vector))]
-    acc = model.predict_proba(text_vector)[0][int(model.predict(text_vector))]
-    # we use our threshold to determine if we understood the client
-    threshold = 0.25
-    if acc > threshold:
-        comprehension = True
-    else:
-        comprehension = False
-    return intent, acc, comprehension
 
 def create_output(sentence):
     # get named entities (aka parameters)
-    context_ner = get_parameters(sentence)
-    sentence = parse(sentence)
+    context_ner = entities(sentence)
+    sentence = parse_soft(sentence)
     # get intent
     greetingPattern = re.compile(r'((.)?onjour|b(.)?njour|bo(.)?jour|bon(.)?our|bonj(.)?ur|bonjo(.)?r|bonjou(.)?)|(.)?ello|(.)?alut')
     thanksPattern = re.compile(r'((.)?erci|mercis|thanks|thank you|thank)')
     if len(sentence) < 25 and re.search(greetingPattern, sentence) is not None:
-        intent = 'greetings'
-        intent, acc, comprehension = intent, 1, True
-
+        intents = ['greetings']
+        intents, acc, comprehension = intents, [1], True
     elif len(sentence) < 25 and re.search(thanksPattern, sentence) is not None:
-        intent = 'thanks'
-        intent, acc, comprehension = intent, 1, True
+        intents = ['thanks']
+        intents, acc, comprehension = intents, [1], True
 
     elif len(sentence) < 250 and (context_ner['phone'] != '' or context_ner['email'] != ''):
-        intent = 'give_info'
-        intent, acc, comprehension = intent, 1, True
-
+        intents = ['give_info']
+        intents, acc, comprehension = intents, [1], True
     else:
-        intent, acc, comprehension = get_intent(sentence)
+        intents, acc, comprehension = intent(sentence)
 
     # create output to send to javascript
     context = {}
     context['message'] = sentence
     context['ok'] = comprehension
     context['accuracy'] = acc
-    context['intent'] = intent
+    context['intent'] = intents
     context['entities'] = context_ner
     print json.dumps(context, indent=4)
     # with open('output.json', 'wb') as f:
