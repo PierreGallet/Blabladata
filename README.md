@@ -4,14 +4,14 @@
 
 The project is organized through 9 folders:
 * ```/classifiers```, that groups the different machine learning & deep learning algorithms, using Keras & Sk-learn. There you can train, using data in a ```/data``` folder (that you have to create) and predict using a model from ```/tmp```.
-* ```/embeddings```, that groups TF-IDF, word2vec, doc2vec and others way to embed ours word vectors, using Gensim & NLTK
-* ```/formatting```, that is there to format any data to a csv with 2 columns (label, sentence) that is our format to do supervised learning.
-* ```/preprocessing```, that process the raw words to the words that will be used for the embeddings part (part of dictionary, etc...)
-* ```/ner```, that groups all ner algorithms, using CRF Suite for python
-* ```/unsupervised```, that groups all unsupervised learning technics, for now : cosine similarity & kmeans.
-* ```/paraphrase_detection```, that groups paraphrase detection algorithms.
-* ```/misc```, that groups miscellaneous scripts
-* ```/tmp```, that groups all ours templates (models that are trained).
+* ```/embeddings```, groups TF-IDF, word2vec, doc2vec and others way to embed ours word vectors, using Gensim & NLTK
+* ```/formatting```, to format any data to a csv with 2 columns (label, sentence) that is our format to do supervised learning.
+* ```/preprocessing```, process the raw words to the words that will be used for the embeddings part (part of dictionary, etc...)
+* ```/ner```, groups all ner algorithms, using CRF Suite for python
+* ```/unsupervised```, groups all unsupervised learning technics, for now : cosine similarity & kmeans.
+* ```/paraphrase_detection```, groups paraphrase detection algorithms.
+* ```/misc```, groups miscellaneous scripts
+* ```/tmp```, groups all ours templates (models that are trained).
 
 ## dependencies
 

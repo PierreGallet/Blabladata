@@ -13,6 +13,7 @@ class csv_threads():
         #self.df = pd.read_csv(self.data, sep=';',error_bad_lines=False)
         self.df = pd.read_csv(self.data, sep=';',error_bad_lines=False)
 
+
     def selection_ligne(self):
 
         print('Debut bonne selection')
@@ -24,6 +25,7 @@ class csv_threads():
 
         print('Fin bonne selection')
 
+
     def supprimer_cat(self,fieldnames):
 
         print('Debut de la suppression des colonnes inutiles')
@@ -34,6 +36,7 @@ class csv_threads():
                 del self.df[column]
 
         print('Fin de la suppression des colonnes inutiles')
+
 
     def fusion_csv(self,messages_formatted,pivot_fusion,type_fusion):
 

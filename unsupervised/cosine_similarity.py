@@ -1,27 +1,11 @@
 # coding: utf8
 import pickle, operator, os, json, time
 import numpy as np
-import preprocessing
+from preprocessing.parse import parse
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 # np.set_printoptions(threshold='nan')
 # np.set_printoptions(suppress=True)
-
-
-
-deep = False
-# dictionary that links machine learning models to their parameters
-ml_models = {}
-# ml_models['reglog_l1'] = 1.0  # C
-ml_models['reglog_l2'] = 1.0  # C
-# ml_models['reglog_sgd'] = 0.0001  # alpha
-# ml_models['naive_bayes'] = ''
-# ml_models['decision_tree'] = 'gini'  # entropy
-# ml_models['random_forest'] = 5  # nb_estimator
-# ml_models['bagging_reglog_l1'] = 5  # nb_estimator
-# ml_models['bagging_reglog_l2'] = 5  # nb_estimator
-# ml_models['svm_linear'] = 1.0  # C
-# ml_models['knn'] = 5  # nb_neighbors
 
 
 # the inputs
@@ -48,7 +32,7 @@ def vectorize_qa():
 def vectorize_input(text):
     with open('./tmp/tfidf.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
-    text = preprocessing.parse_txt(text)
+    text = parse(text)
     text = np.asarray(vectorizer.transform([text]).todense())
     return text
 

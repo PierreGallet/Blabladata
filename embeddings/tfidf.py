@@ -131,9 +131,7 @@ class tfidf():
 
 if __name__ == '__main__':
 
-    path_sentences = './ml/input/sentences.txt'
-    path_labels = './ml/input/labels.txt'
-
-    sentences, labels = formatting_ml_input(path_sentences, path_labels)
-    X_train, X_val, y_train, y_val = load_data()
-    print(X_train.shape, X_val.shape, y_train.shape, y_val.shape)
+    path_sentences = './data/inputs/sentences.txt'
+    model = tfidf()
+    model = model.train(path_sentences)
+    model

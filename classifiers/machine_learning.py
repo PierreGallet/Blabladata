@@ -32,16 +32,17 @@ class machine_learning():
                 X_train, X_val, y_train, y_val = train_test_split(sentences, labels, test_size=test_size, random_state=100)
         self.X_train = X_train
         self.X_val = X_val
-        self.y_train = y_train
-        self.y_val = y_val
-        print(X_train.shape, y_train.shape)
-        print(len(X_train), 'train sequences')
-        print(len(X_val), 'validation sequences')
+        self.y_train = np.ravel(y_train)
+        self.y_val = np.ravel(y_val)
+        # print(X_train.shape, y_train.shape)
+        # print(len(X_train), 'train sequences')
+        # print(len(X_val), 'validation sequences')
 
 
     def build(self, model_name, params):
         print('...Build model...')
         self.model_name = model_name
+        self.params = params
         if model_name == 'reglog_l1':
             self.model = linear.LogisticRegression(penalty='l2', C=params)
         elif model_name == 'reglog_l2':
@@ -49,7 +50,7 @@ class machine_learning():
         elif model_name == 'reglog_sgd':
             self.model = linear.SGDClassifier(loss="log", penalty='elasticnet', alpha=params)
         elif model_name == 'naive_bayes':
-            self.model = nb.BernoulliNB()
+            self.model = nb.BernoulliNB(alpha=params)
         elif model_name == 'decision_tree':
             self.model = tree.DecisionTreeClassifier(criterion=params)
         elif model_name == 'random_forest':
@@ -73,8 +74,11 @@ class machine_learning():
         if not os.path.exists('./tmp/models_saved'):
             os.makedirs('./tmp/models_saved')
 
+        if os.path.exists('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl'):
+            os.remove('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl')
+
         print('...Saving model...')
-        with open('./tmp/models_saved/'+self.model_name+'.pkl', 'wb') as f:
+        with open('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl', 'wb') as f:
             pickle.dump(self.model, f)
         print('...Model Saved...') # pourquoi aussi long de saver le modèle?
 
@@ -82,7 +86,7 @@ class machine_learning():
     def predict(self):
         with open('./tmp/models_saved/classes.json', 'rb') as f:
             classes = json.load(f)
-            target_names = [labels for key, labels in classes.items()]
+            self.target_names = [labels for key, labels in classes.items()]
 
         for i in range(len(self.target_names)):
             self.target_names[i] = self.target_names[i].encode('utf-8')
@@ -91,11 +95,12 @@ class machine_learning():
         self.pred = self.model.predict(self.X_val)
         self.accuracy = accuracy_score(self.y_val, self.pred)
         self.confusion_matrix = np.array(confusion_matrix(self.y_val, self.pred), dtype=float)
-        self.classification_report = classification_report(self.y_val, self.pred, target_names=target_names)
-        print(self.pred)
+        self.classification_report = classification_report(self.y_val, self.pred, target_names=self.target_names)
+        # print(self.pred)
         print('\n\n## FINISHED ##')
-        print('\nresult for the ' + self.model_name + ' on validation set:')
+        print('\nresult for the ' + self.model_name + ' with parameters ' + str(self.params) + ' on validation set:')
         print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage_training_time:', self.average_training_time, '\nclassification report', self.classification_report)
+        return self.accuracy
 
 
 if __name__ == '__main__':
