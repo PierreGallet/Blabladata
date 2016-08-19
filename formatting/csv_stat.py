@@ -120,7 +120,7 @@ class csv_stat():
 
     def nbre_conv(self):
         """ Nombre de conversation en données """
-        self.df.intervention_id.drop_duplicates().dropna().size
+        self.df.groupby('intervention_id').size().size
 
 if __name__ == '__main__':
     test = csv_stat('message_formated_juillet.csv')

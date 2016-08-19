@@ -9,9 +9,11 @@ class concatenate_csv():
 
 
     def __init__(self,dossier):
+
         self.dossier = dossier
 
     def concatenate_csv(self,name):
+
         final_csv=open(name,"a")
         i=0
         for fn in os.listdir(self.dossier):
@@ -31,14 +33,20 @@ class concatenate_csv():
                             final_csv.write(raw)
         final_csv.close()
         self.concatenated_csv = name
+        print ('Fin de la concatenation')
 
     def check_concat_work(self):
-        conca = pd.read_csv(self.concatenated_csv, delimiter=';',low_memory=False)
+        conca = pd.read_csv('./data/SFR/csv_concatenated.csv', delimiter=';',error_bad_lines=False)
         row_count = list()
-        for fn in os.listdir(dossier):
-            fichier = pd.read_csv(self.dossier+'/'+fn, delimiter=';',low_memory=False)
+        for fn in os.listdir(self.dossier):
+            fichier = pd.read_csv(self.dossier+'/'+fn, delimiter=';',error_bad_lines=False)
             lon = fichier.shape[0]
             row_count.append(lon)
-            print lon
+            print(lon)
         print sum(row_count)
         print conca.shape[0]
+
+if __name__ == '__main__':
+
+    check = concatenate_csv('./data/SFR/rawdata')
+    check.check_concat_work()
