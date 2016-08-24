@@ -13,6 +13,7 @@ class csv_threads():
         #self.df = pd.read_csv(self.data, sep=';',error_bad_lines=False)
         self.df = pd.read_csv(self.data, sep=';',error_bad_lines=False)
 
+
     def selection_ligne(self):
 
         print('Debut bonne selection')
@@ -23,6 +24,7 @@ class csv_threads():
         self.df = self.df[cond]
 
         print('Fin bonne selection')
+
 
     def supprimer_cat(self,fieldnames):
 
@@ -42,6 +44,7 @@ class csv_threads():
         self.df = self.df.rename(columns=dict_nom)
 
         print('Fin du changement de nom')
+
 
     def fusion_csv(self,messages_formatted,pivot_fusion,type_fusion):
 

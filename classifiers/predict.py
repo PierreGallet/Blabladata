@@ -6,11 +6,11 @@ import numpy as np
 from pprint import pprint
 
 
-def intent(sentence, threshold=0.25):
+def intent(sentence, model_name='reglog_l1?p=1.0.pkl', threshold=0.25):
 
     # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
     try:
-        with open('./tmp/models_saved/reglog_l2.pkl', 'rb') as f:
+        with open('./tmp/models_saved/'+model_name, 'rb') as f:
             model = pickle.load(f)
         with open('./tmp/tfidf.pkl', 'rb') as f:
             tfidf_vectorizer = pickle.load(f)
@@ -46,4 +46,5 @@ def intent(sentence, threshold=0.25):
 
 if __name__ == '__main__':
     sentence = "J'ai envie d'aller faire une course"
+    model_name = 'reglog_l1?p=1.0.pkl'
     intent(sentence)

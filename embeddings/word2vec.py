@@ -14,8 +14,8 @@ from sklearn.preprocessing import LabelBinarizer
 
 np.random.seed(1337)  # for reproducibility
 
-# txt = 'comédie'
-# txt = txt.decode('utf8') # affiche \utx
+# txt = 'com\xe9die'
+# txt = txt.encode('utf8') # affiche \utx
 # txt = txt.encode('utf8')
 # print(txt)
 
@@ -151,22 +151,10 @@ class word2vec():
 
 if __name__ == '__main__':
 
-    question = './question.txt'
-
-    # INPUTS
-    path_sentences = './dl/input/test/sentences.txt'
-    path_labels = './dl/input/test/labels.txt'
-
-    # OUTPUTS
-    path_sentences_output = './dl/input/formated/test/sentences.npy'
-    path_labels_output = './dl/input/formated/test/labels.npy'
-
-
-    training_word2vec(path_sentences)
-    index_dict, word_vectors = getting_dictionaries()
-    embedding_weights = getting_weights_matrix(index_dict, word_vectors)
-    formatting_input(index_dict, path_sentences, path_labels)
-
-    # index_dict = get_frequency_dictionary(path_sentences)
-    # print(index_dict.items())
-    # sentences, labels = formatting_input(index_dict, path_sentences, path_labels)
+    path_sentences='./data/Wikipedia/wiki_french.txt'
+    # path_sentences='./data/inputs/sentences.txt'
+    model = word2vec()
+    model = model.train(path_sentences)
+    str1 = "forfait facture".split()
+    str2 = "je veux annuler cet abonnement SFR, j'ai trop de hors forfait avec vous".split()
+    print(model.most_similar(str1))

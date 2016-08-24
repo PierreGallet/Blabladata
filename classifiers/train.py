@@ -12,8 +12,6 @@ from ner.train import ner
 # np.set_printoptions(suppress=True)
 
 
-#Parameters
-data_directory = './data/SFR/messages_formated_cat.csv'
 
 class classifier():
 
@@ -25,6 +23,7 @@ class classifier():
         # compute word2vec and assign the right index to each word to make a proper numerical matrix to feed our model.
         self.word2vec = word2vec.word2vec()
         if not os.path.exists('./tmp/word2vec'):
+            print('word2vec not found, it will need to be trained with input data.')
             self.word2vec.train('./data/inputs/sentences.txt', size=128)
         self.word2vec.format_input()
 
@@ -62,8 +61,12 @@ class classifier():
         print(results)
 
 
+
 if __name__ == '__main__':
 
+    ########
+    #INPUTS#
+    ########
     deep = False
     # dictionary that links machine learning models to their parameters
     ml_models = {}
