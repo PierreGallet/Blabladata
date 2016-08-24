@@ -1,7 +1,7 @@
 # coding: utf-8
 """ Train sklearn's most relevant models """
 from __future__ import print_function, division
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import time, pickle, os, json
 import sklearn.linear_model as linear
@@ -43,9 +43,9 @@ class machine_learning():
         print('...Build model...')
         self.model_name = model_name
         if model_name == 'reglog_l1':
-            self.model = linear.LogisticRegression(penalty='l2', C=params)
-        elif model_name == 'reglog_l2':
             self.model = linear.LogisticRegression(penalty='l1', C=params)
+        elif model_name == 'reglog_l2':
+            self.model = linear.LogisticRegression(penalty='l2', C=params)
         elif model_name == 'reglog_sgd':
             self.model = linear.SGDClassifier(loss="log", penalty='elasticnet', alpha=params)
         elif model_name == 'naive_bayes':
@@ -63,7 +63,6 @@ class machine_learning():
         elif model_name == 'knn':
             self.model = neighbors.KNeighborsClassifier(n_neighbors=params, metric='minkowski', weights='distance')
 
-
     def train(self):
         print('...Train...')
         start_time = time.time()
@@ -73,16 +72,33 @@ class machine_learning():
         if not os.path.exists('./tmp/models_saved'):
             os.makedirs('./tmp/models_saved')
 
-        print('...Saving model...')
-        with open('./tmp/models_saved/'+self.model_name+'.pkl', 'wb') as f:
-            pickle.dump(self.model, f)
-        print('...Model Saved...') # pourquoi aussi long de saver le modèle?
+        # On save aucun model pour le moment
+        # print('...Saving model...')
+        # with open('./tmp/models_saved/'+self.model_name+'.pkl', 'wb') as f:
+        #     pickle.dump(self.model, f)
+        # print('...Model Saved...') # pourquoi aussi long de saver le modèle?
 
+    def train_tree(self,X_train,y_train):
+        print('...Train...')
+        start_time = time.time()
+        self.model.fit(X_train, y_train)
+        self.average_training_time = (time.time() - start_time)
+
+        if not os.path.exists('./tmp/models_saved'):
+            os.makedirs('./tmp/models_saved')
+
+        # On save aucun model pour le moment
+        # print('...Saving model...')
+        # with open('./tmp/models_saved/'+self.model_name+'.pkl', 'wb') as f:
+        #     pickle.dump(self.model, f)
+        # print('...Model Saved...') # pourquoi aussi long de saver le modèle?
+
+        return self.model
 
     def predict(self):
         with open('./tmp/models_saved/classes.json', 'rb') as f:
             classes = json.load(f)
-            target_names = [labels for key, labels in classes.items()]
+            self.target_names = [labels for key, labels in classes.items()]
 
         for i in range(len(self.target_names)):
             self.target_names[i] = self.target_names[i].encode('utf-8')
@@ -90,13 +106,14 @@ class machine_learning():
 
         self.pred = self.model.predict(self.X_val)
         self.accuracy = accuracy_score(self.y_val, self.pred)
-        self.confusion_matrix = np.array(confusion_matrix(self.y_val, self.pred), dtype=float)
-        self.classification_report = classification_report(self.y_val, self.pred, target_names=target_names)
-        print(self.pred)
+        #self.confusion_matrix = np.array(confusion_matrix(self.y_val, self.pred), dtype=float)
+        #self.classification_report = classification_report(self.y_val, self.pred, target_names=self.target_names)
+        #print(self.pred)
         print('\n\n## FINISHED ##')
         print('\nresult for the ' + self.model_name + ' on validation set:')
-        print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage_training_time:', self.average_training_time, '\nclassification report', self.classification_report)
-
+        #print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage_training_time:', self.average_training_time, '\nclassification report', self.classification_report)
+        print('accuracy:',self.accuracy,'\naverage_training_time:',self.average_training_time)
+        return [self.accuracy,self.average_training_time]
 
 if __name__ == '__main__':
 

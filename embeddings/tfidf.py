@@ -36,13 +36,14 @@ class tfidf():
         corpus = myCorpus()
 
         # Plus tard toucher à ngram_range pour avoir aussi des bi-grams
-        vectorizer = TfidfVectorizer(encoding='utf8')
+        #vectorizer = TfidfVectorizer(encoding='utf8',ngram_range=(2,2),min_df=3)
+        vectorizer = TfidfVectorizer(encoding='utf8',ngram_range=(2,2),min_df=3)
         vectorizer.fit(corpus)
 
         with open('./tmp/tfidf.pkl', 'wb') as f:
             pickle.dump(vectorizer, f)
 
-        print('...tfidf computation ended')
+        print('...train tfidf ended')
 
 
     def feature_selection(self, sentences, threshold=0.7):
@@ -99,6 +100,63 @@ class tfidf():
         print('shape of labels', labels.shape)
         return sentences, labels
 
+    def format_input_tree(self, feature_selection_threshold=0.85):
+        self.path_sentences = './data/inputs/sentences.txt'
+        self.path_labels = './data/inputs/labels.txt'
+        self.path_labels_1 = './data/inputs/labels_1.txt'
+        self.path_labels_2 = './data/inputs/labels_2.txt'
+        self.path_labels_3 = './data/inputs/labels_3.txt'
+
+        self.path_sentences_output = './data/inputs/tfidf/sentences.npy'
+        self.path_labels_output = './data/inputs/tfidf/labels.npy'
+        self.path_labels_output_1='./data/inputs/tfidf/labels_1.npy'
+        self.path_labels_output_2='./data/inputs/tfidf/labels_2.npy'
+        self.path_labels_output_3='./data/inputs/tfidf/labels_3.npy'
+
+        # we load the tfidf vectorizer
+        with open('./tmp/tfidf.pkl', 'rb') as f:
+            vectorizer = pickle.load(f)
+        # we load the sentences data
+        def myCorpus():
+            for line in open(self.path_sentences):
+                yield line
+        corpus = myCorpus()
+        # vectorization + densification of the sparse matrix obtained
+        sentences = vectorizer.transform(corpus)
+        sentences = sentences.todense()
+        sentences = np.asarray(sentences)  # size samples x lenght of vocabulary
+
+        with open(self.path_sentences_output, 'wb') as f:
+            np.save(f, sentences)
+        print('shape of sentences', sentences.shape)
+
+        # print("shape before feature selection:", sentences.shape)
+        # print("feature selection starting")
+        # sentences = self.feature_selection(sentences, threshold=feature_selection_threshold)
+        # print("shape after feature selection:", sentences.shape)
+
+        def create_np_labels(fichier_txt,fichier_np):
+            with open(fichier_txt, 'r+') as f:
+                lines = f.readlines()
+                name_np = np.zeros((len(lines), 1))
+                i = 0
+                for line in lines:
+                    try:
+                        name_np[i] = int(line)
+                        i += 1
+                    except ValueError:
+                        name_np[i] = np.nan
+                        i +=1
+            with open(fichier_np, 'wb') as f:
+                np.save(f, name_np)
+            print('shape of labels', name_np.shape)
+
+        #labels = create_np_labels(self.path_labels,self.path_labels_output)
+        labels_1 = create_np_labels(self.path_labels_1,self.path_labels_output_1)
+        labels_2 = create_np_labels(self.path_labels_2,self.path_labels_output_2)
+        labels_3 = create_np_labels(self.path_labels_3,self.path_labels_output_3)
+
+        #return sentences, labels
 
     # def get_tfidf_vectors_gensim(path_sentences):
     #

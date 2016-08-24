@@ -1,7 +1,7 @@
 # coding: utf-8
 """ Train sklearn's most relevant models """
 from __future__ import print_function, division
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import time, pickle, os
 import sklearn.linear_model as linear

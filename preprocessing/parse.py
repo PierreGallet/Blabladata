@@ -27,7 +27,7 @@ def parse(txt):
     a = a.translate(trantab) # On enleve la ponctuation
     a = a.decode('utf-8', 'replace')
     a = a.split() # On répartit selon les espaces
-    # a = [stemmer.stem(word) for word in a]
+    #a = [stemmer.stem(word) for word in a]
 
     a = [word for word in a if not word.isdigit()]
     stop = stopwords.words('french')
@@ -89,6 +89,11 @@ class preprocessing():
         self.path_sentences = self.new_directory+'/sentences.txt'
         self.path_labels = self.new_directory+'/labels.txt'
 
+        # For tree_classifier
+        self.path_labels_1 = self.new_directory+'/labels_1.txt'
+        self.path_labels_2 = self.new_directory+'/labels_2.txt'
+        self.path_labels_3 = self.new_directory+'/labels_3.txt'
+
         # for paraphrase detection
         self.path_sentences_1 = self.new_directory+'/sentences_1.txt'
         self.path_sentences_2 = self.new_directory+'/sentences_2.txt'
@@ -113,7 +118,11 @@ class preprocessing():
 
 
     def get_number_of_classes(self):
-        self.number_of_classes = len(self.label_index)
+        print('ici')
+        try:
+            self.number_of_classes = len(self.label_index)
+        except:
+            self.number_of_classes = self.raw_data.groupby('label').size().size
         return self.number_of_classes
 
 
@@ -162,6 +171,39 @@ class preprocessing():
         target_names = self.get_classes_names()  # here we save classes into the json
         pprint(target_names)
         print('...csv preprocessing ended')
+
+    def csv_multi_motifs(self, word_label=False):
+        """
+        works with a csv semi colon separated, with two field : label and sentence
+        store the result in the new_directory/input section in .txt format
+        """
+        with open(self.path_sentences, 'w+') as sentences:
+            with open(self.path_labels, 'w+') as labels:
+                with open(self.path_labels_1, 'w+') as labels_1:
+                    with open(self.path_labels_2,'w+') as labels_2:
+                        with open(self.path_labels_3,'w+') as labels_3:
+                            with open(self.data_directory, 'rb') as f:
+                                reader = csv.DictReader(f, fieldnames=['label', 'sentence','label_1','label_2','label_3'], delimiter=';')
+                                i = 0
+                                for row in reader:
+                                    if i == 0:
+                                        i += 1
+                                    else:
+                                        txt = parse(row['sentence'])
+                                        label = row['label']
+                                        label_1=row['label_1']
+                                        label_2=row['label_2']
+                                        label_3=row['label_3']
+                                        sentences.write(txt+'\n')
+                                        labels.write(str(label)+'\n')
+                                        labels_1.write(str(label_1)+'\n')
+                                        labels_2.write(str(label_2)+'\n')
+                                        labels_3.write(str(label_3)+'\n')
+            print('number of classes:', self.get_number_of_classes())
+            print('classes names:')
+            target_names = self.get_classes_names()  # here we save classes into the json
+            pprint(target_names)
+            print('...csv preprocessing ended')
 
 
     def txt_directory(self):

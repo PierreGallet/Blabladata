@@ -19,7 +19,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.cross_validation import train_test_split, StratifiedKFold
 import pickle, time
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import os
 np.set_printoptions(suppress=True)
 np.set_printoptions(threshold='nan')
