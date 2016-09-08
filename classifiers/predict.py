@@ -6,7 +6,7 @@ import numpy as np
 from pprint import pprint
 
 
-def intent(sentence, model_name='reglog_l1?p=1.0.pkl', threshold=0.25):
+def intent(sentence, model_name='reglog_l2?p=1.pkl', threshold=0.01):
 
     # we load tfidf (idf + vocabulary learn by fit in tfidf.py) & the model
     try:

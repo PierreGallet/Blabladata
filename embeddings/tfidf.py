@@ -36,8 +36,8 @@ class tfidf():
         corpus = myCorpus()
 
         # Plus tard toucher à ngram_range pour avoir aussi des bi-grams
+        vectorizer = TfidfVectorizer(encoding='utf8')
         #vectorizer = TfidfVectorizer(encoding='utf8',ngram_range=(2,2),min_df=3)
-        vectorizer = TfidfVectorizer(encoding='utf8',ngram_range=(2,2),min_df=3)
         vectorizer.fit(corpus)
 
         with open('./tmp/tfidf.pkl', 'wb') as f:

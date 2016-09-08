@@ -23,9 +23,9 @@ NNNI-1
 I-1
 I0
 tp10
-bS'\xd6V\xc3U\x99\x9e\xdf?'
+bS'\xe9!\xe1\x15q\x12\xe1?'
 p11
 tp12
 Rp13
-aF18.25888991355896
+aF13.735079050064087
 ass.

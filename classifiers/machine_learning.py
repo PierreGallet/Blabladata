@@ -71,13 +71,13 @@ class machine_learning():
         self.average_training_time = (time.time() - start_time)
 
 
-        # if os.path.exists('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl'):
-        #     os.remove('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl')
-        #
-        # print('...Saving model...')
-        # with open('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl', 'wb') as f:
-        #     pickle.dump(self.model, f)
-        # print('...Model Saved...') # pourquoi aussi long de saver le modèle?
+        if os.path.exists('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl'):
+            os.remove('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl')
+        
+        print('...Saving model...')
+        with open('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl', 'wb') as f:
+            pickle.dump(self.model, f)
+        print('...Model Saved...') # pourquoi aussi long de saver le modèle?
 
     def train_tree(self,X_train,y_train):
         print('...Train...')

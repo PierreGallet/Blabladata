@@ -18,7 +18,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.cross_validation import train_test_split, StratifiedKFold
 import pickle, time, unicodedata
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import os, json
 np.random.seed(1337)  # for reproducibility
 np.set_printoptions(suppress=True)
