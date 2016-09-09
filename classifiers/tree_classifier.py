@@ -3,6 +3,7 @@ from __future__ import division
 import pickle, operator, os
 import pandas as pd
 import numpy as np
+import sys
 from formatting.csv_threads import csv_threads
 from preprocessing.parse import preprocessing
 from classifiers import deep_learning, machine_learning
@@ -319,37 +320,40 @@ if __name__ == '__main__':
 
     #Selection des data
     #On s'arrange pour ne garder que les deux colonnes sentence et label du csv
-    # data = csv_threads(data_directory)
-    # data.supprimer_cat(['custom_code_motif','sentence'])
-    # data.changer_nom_colonne({'custom_code_motif':'label'})
-    # print data.df.columns.values
-    # cond = data.df.apply(lambda row:(pd.isnull(row['label'])==False), axis=1)
-    # data.df = data.df[cond]
-    # data.csv_top_cat(14,'label')
-    # data.sep_motifs('label')
+    print (sys.version)
+    data = csv_threads(data_directory)
+    data.supprimer_cat(['custom_code_motif','sentence'])
+    data.changer_nom_colonne({'custom_code_motif':'label'})
+    print (data.df.columns.values)
+    cond = data.df.apply(lambda row:(pd.isnull(row['label'])==False), axis=1)
+    data.df = data.df[cond]
+    data.csv_top_cat(14,'label')
+    print(data.df)
+    data.sep_motifs('label')
+    print(data.df)
     # data.df = data.df.replace({'F': '5'}) # on remplace le label 'F par 5 pour le numpyarray'
     # data.dataframe_to_csv(data_directory_2)
 
     # #Preprocessing
-    preprocessing = preprocessing(data_directory_2)
-    preprocessing.csv_multi_motifs(word_label=False)
-
-    # # Classification
-
-    classifier = tree_classifier(data_directory_2)
-    classifier.vectorize_and_split()
-    classifier.generate_tree()
-    classifier.generate_label_at_node()
-    classifier.train_tree_ml()
-    classifier.classifier_tree_ml()
-    classifier.tree_prediction()
-    classifier.accuracy_tree()
-    classifier.accuracy_node('')
-    classifier.accuracy_node('1')
-    classifier.accuracy_node('2')
-    classifier.accuracy_node('4')
-    classifier.accuracy_node('2-2')
-    classifier.accuracy_node('4-4')
+    # preprocessing = preprocessing(data_directory_2)
+    # preprocessing.csv_multi_motifs(word_label=False)
+    #
+    # # # Classification
+    #
+    # classifier = tree_classifier(data_directory_2)
+    # classifier.vectorize_and_split()
+    # classifier.generate_tree()
+    # classifier.generate_label_at_node()
+    # classifier.train_tree_ml()
+    # classifier.classifier_tree_ml()
+    # classifier.tree_prediction()
+    # classifier.accuracy_tree()
+    # classifier.accuracy_node('')
+    # classifier.accuracy_node('1')
+    # classifier.accuracy_node('2')
+    # classifier.accuracy_node('4')
+    # classifier.accuracy_node('2-2')
+    # classifier.accuracy_node('4-4')
 
     # and put data in sentence.txt and label.txt
     #classifier.train_ml()  # does the training
