@@ -105,7 +105,7 @@ class machine_learning():
     def predict(self):
         with open(self.output_directory + '/models_saved/classes.json', 'rb') as f:
             classes = json.load(f)
-            self.target_names = [labels for key, labels in classes.items()]
+            target_names = [classes[str(i)] for i in range(len(list(classes.keys())))]
 
         for i in range(len(self.target_names)):
             try:

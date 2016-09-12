@@ -5,9 +5,41 @@ from preprocessing.parse import parse
 import os, pickle, json, operator
 import numpy as np
 from pprint import pprint
-from keras.models import model_from_json
-from pprint import pprint
-from keras.preprocessing import sequence
+
+# Define a context manager to suppress stdout and stderr so that 'using theano backend' will not be printed (necessary for the use of python-shell that will look at everything that is printed)
+class suppress_stdout_stderr(object):
+    '''
+    A context manager for doing a "deep suppression" of stdout and stderr in
+    Python, i.e. will suppress all print, even if the print originates in a
+    compiled C/Fortran sub-function.
+       This will not suppress raised exceptions, since exceptions are printed
+    to stderr just before a script exits, and after the context manager has
+    exited (at least, I think that is why it lets exceptions through).
+
+    '''
+    def __init__(self):
+        # Open a pair of null files
+        self.null_fds =  [os.open(os.devnull,os.O_RDWR) for x in range(2)]
+        # Save the actual stdout (1) and stderr (2) file descriptors.
+        self.save_fds = (os.dup(1), os.dup(2))
+
+    def __enter__(self):
+        # Assign the null pointers to stdout and stderr.
+        os.dup2(self.null_fds[0],1)
+        os.dup2(self.null_fds[1],2)
+
+    def __exit__(self, *_):
+        # Re-assign the real stdout/stderr back to (1) and (2)
+        os.dup2(self.save_fds[0],1)
+        os.dup2(self.save_fds[1],2)
+        # Close the null files
+        os.close(self.null_fds[0])
+        os.close(self.null_fds[1])
+
+with suppress_stdout_stderr():
+    from keras.models import model_from_json
+    from keras.preprocessing import sequence
+
 
 def predict(sentence, path='./tmp/sentiment', deep=True, model_name='cnn_lstm', threshold=0.01):
     if deep:
@@ -15,14 +47,13 @@ def predict(sentence, path='./tmp/sentiment', deep=True, model_name='cnn_lstm', 
         try:
             with open(path+'/models_saved/'+model_name+'.json', 'rb') as f:
                 model_json = f.read()
-                print model_json
                 model = model_from_json(model_json)
                 model.load_weights(path+'/models_saved/'+model_name+'_weights.h5')
             with open(path+'/index_dict.pk') as f:
                 index_dict = pickle.load(f)
             with open(path+'/models_saved/classes.json', 'rb') as f:
                 classes = json.load(f)
-                target_names = [labels for key, labels in classes.items()]
+                target_names = [classes[str(i)] for i in range(len(list(classes.keys())))]
         except:
             raise IOError('DL model not found, try to train it from classifier/train.py')
 
@@ -30,7 +61,6 @@ def predict(sentence, path='./tmp/sentiment', deep=True, model_name='cnn_lstm', 
         text_parsed = parse(sentence)
         text_vector = []
         nb_unknown = 0
-        print text_parsed
         for word in text_parsed.split():
             try:
                 text_vector.append(index_dict[word.decode('utf-8')])
@@ -51,7 +81,7 @@ def predict(sentence, path='./tmp/sentiment', deep=True, model_name='cnn_lstm', 
                 tfidf_vectorizer = pickle.load(f)
             with open(path+'/models_saved/classes.json', 'rb') as f:
                 classes = json.load(f)
-                target_names = [labels for key, labels in classes.items()]
+                target_names = [classes[str(i)] for i in range(len(list(classes.keys())))]
         except:
             raise IOError('ML model not found, try to train it from classifier/train.py')
 
@@ -62,7 +92,6 @@ def predict(sentence, path='./tmp/sentiment', deep=True, model_name='cnn_lstm', 
 
         # we apply the model on our vectorized input
         list_acc = model.predict_proba(text_vector)[0]
-
     accuracy = {target_names[index]: acc for index, acc in enumerate(list_acc)}
     sorted_acc = sorted(accuracy.items(), key=operator.itemgetter(1), reverse=True)
     # we use our threshold to determine if we understood the intent
@@ -79,7 +108,7 @@ def predict(sentence, path='./tmp/sentiment', deep=True, model_name='cnn_lstm', 
     return results['intent'], results['accuracy'], results['ok']
 
 if __name__ == '__main__':
-
-    sentence = "Je suis vraiment enervé, j'ai envie de partir de SFR. Votre service laisse vraiment à désirer"
+    sentence = "un chef d'oeuvre du cinema. Du grand spectacle, un plaisir pour les yeux!"
+    # sentence = "Ce film a été vraiment nul , une merde du debut à la fin, mal filmé"
     print 'sentiment: ', predict(sentence, path='./tmp/sentiment', model_name='cnn_lstm', deep=True)
     print 'intent: ', predict(sentence, path='./tmp/intent', model_name='reglog_l2?p=5.0', deep=False)

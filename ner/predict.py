@@ -58,12 +58,13 @@ def regex_detection(sentences):
     phonePattern = re.compile(r'(?P<phone>(0|\+33)[-.\s]*[1-9]([-.\s]*[0-9]){8})')  # \s = [ \t\n\r\f\v]
     emailPattern = re.compile(r'(?P<email>[A-Za-z0-9._-]+@[A-Za-z0-9._-]{2,}\.[a-z]{2,10})')   #TODO: ajout de àâäçéèêëîïôöûùüÿñæœ ?
     datePattern = re.compile(r'(?P<date>[0-3][0-9][-/.\s]([0-9]){2}[-/.\s]([0-9]){2,4})')  # JJ/MM/AAAA
-    zipcodePattern = re.compile(r'(?P<zipcode>[0-9]{4,5})')
+    zipcodePattern = re.compile(r'(?P<zipcode>[^0-9][0-9]{4,5}[^0-9])')
     urlPattern = re.compile(r'(?P<url>((http|https|ftp):\/\/)?([-\w]*\.)?([-\w]*)\.(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|arpa|[a-z]{2,3})\/[-_\w\/=?]*(\.[\w]{2,8})?)')
     moneyPattern = re.compile(r'(?P<money>\s\d{,4}([,.€]\d{,2})?(\s)?(€|euros|euro|e|cent|cents|centimes|centime)?(\s)?(\d{,2})?\s)')
+    ponctuationPattern = re.compile(r'(?P<ponc>[-!"\#$%&\'()*+,./:;<=>?@\[\\\]^_`{|}~])')
 
     if re.search(phonePattern, sentences) is not None:
-        phone = re.search(phonePattern, sentences).group('phone').replace('.', '').replace('-', '').replace(' ', '')
+        phone = ponctuationPattern.sub('', re.search(phonePattern, sentences).group('phone').replace(' ', ''))
     if re.search(emailPattern, sentences) is not None:
         email = re.search(emailPattern, sentences).group('email')
     if re.search(datePattern, sentences) is not None:
@@ -71,7 +72,7 @@ def regex_detection(sentences):
     if re.search(urlPattern, sentences) is not None:
         url = re.search(urlPattern, sentences).group('url')
     if re.search(zipcodePattern, sentences) is not None:
-        zipcode = re.search(zipcodePattern, sentences).group('zipcode').strip()
+        zipcode = ponctuationPattern.sub('', re.search(zipcodePattern, sentences).group('zipcode').strip())
     if re.search(moneyPattern, sentences) is not None:
         money = re.search(moneyPattern, sentences).group('money').strip()
         if '€' not in money and 'euro' not in money:
@@ -106,5 +107,5 @@ def entities(sentences):
 
 if __name__ == '__main__':
 
-    sentences = "Mon numéro c'est +332-34.5 43.232, Je me prénome Maxime Le Dantec. J'ai payé 15 euros 20; et je suis à la bnp Paribas et j'habite au 4 rue Biscornet à Paris 75012. Email : pierre.gallet@hotmail.fr. site : http://41mag.fr/regexp-php-les-8-expressions-regulieres-les-plus-utilisees.html. 12/12/2019"
+    sentences = "Mon numéro c'est +332-34.5 43.232, Je me prénome Maxime Le Dantec. 012434 J'ai payé 15 euros 01230; et je suis à la bnp Paribas et j'habite au 4 rue Biscornet à Paris 75012. Email : pierre.gallet@hotmail.fr. site : http://41mag.fr/regexp-php-les-8-expressions-regulieres-les-plus-utilisees.html. 12/12/2019"
     pprint(entities(sentences))

@@ -40,7 +40,7 @@ class deep_learning():
             self.path_labels = './data/inputs/tfidf/labels.npy'
         with open(self.output_directory + '/models_saved/classes.json', 'rb') as f:
             classes = json.load(f)
-            self.target_names = [labels for key, labels in classes.items()]
+            self.target_names = [classes[str(i)] for i in range(len(list(classes.keys())))]
             self.number_of_classes = len(self.target_names)
 
 
@@ -170,7 +170,7 @@ class deep_learning():
 
         # compute prediction on validation set
         self.pred = self.model.predict(self.X_val, batch_size=self.batch_size)
-        print(self.model.predict([0,1,2,3,4], batch_size=self.batch_size))
+
         # transform the prediction matrix into a vector with labels indexes
         print(self.pred[:5])
         self.pred_vector = np.zeros(self.pred.shape[0])
