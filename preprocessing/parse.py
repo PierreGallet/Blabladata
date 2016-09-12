@@ -73,10 +73,11 @@ class preprocessing():
     lots of different methods to preprocess data
     """
 
-    def __init__(self, data_directory):
+    def __init__(self, data_directory, output_directory):
         """
         create the new directory (don't forget the path syntax : ./name_of_directory) and the input folder
         """
+        self.output_directory = output_directory
         self.new_directory = './data/inputs'
         try:
             shutil.rmtree(self.new_directory)
@@ -113,13 +114,13 @@ class preprocessing():
         self.label_index = {}
         i = 0
         for label in labels:
+            label = str(label)
             self.label_index[label] = i
             i += 1
         return self.label_index
 
 
     def get_number_of_classes(self):
-        print('ici')
         try:
             self.number_of_classes = len(self.label_index)
         except:
@@ -133,9 +134,9 @@ class preprocessing():
         for i in range(self.number_of_classes):
             self.labels[i] = target_names[i]
 
-        if not os.path.exists('./tmp/models_saved'):
-            makedirs('./tmp/models_saved')
-        with open('./tmp/models_saved/classes.json', 'wb') as f:
+        if not os.path.exists(self.output_directory+'/models_saved'):
+            makedirs(self.output_directory+'/models_saved')
+        with open(self.output_directory+'/models_saved/classes.json', 'wb') as f:
             json.dump(self.labels, f, indent=4)
 
         return self.labels

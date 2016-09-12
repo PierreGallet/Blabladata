@@ -16,22 +16,27 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split, StratifiedKFold
 
 
+
 class machine_learning():
 
 
-    def __init__(self):
+    def __init__(self, output_directory, save=True):
+        self.save = save
         self.path_sentences = './data/inputs/tfidf/sentences.npy'
         self.path_labels = './data/inputs/tfidf/labels.npy'
+        self.output_directory = output_directory
 
-
-    def prepare_data(self, test_size=0.20):
-        with open(self.path_sentences, 'rb') as sentences_npy:
-            with open(self.path_labels, 'rb') as labels_npy:
-                sentences = np.array(np.load(sentences_npy))
-                labels = np.array(np.load(labels_npy))
-                X_train, X_val, y_train, y_val = train_test_split(sentences, labels, test_size=test_size, random_state=100)
+    def prepare_data(self, sentences, labels, test_size=0.20):
+        print('yooo')
+        # print(sentences)
+        # with open(self.path_sentences, 'rb') as sentences_npy:
+        #     with open(self.path_labels, 'rb') as labels_npy:
+        #         sentences = np.array(np.load(sentences_npy))
+        #         labels = np.array(np.load(labels_npy))
+        X_train, X_val, y_train, y_val = train_test_split(sentences, labels, test_size=test_size, random_state=100)
         self.X_train = X_train
         self.X_val = X_val
+        print('goal')
         self.y_train = np.ravel(y_train)
         self.y_val = np.ravel(y_val)
         # print(X_train.shape, y_train.shape)
@@ -70,45 +75,55 @@ class machine_learning():
         self.model.fit(self.X_train, self.y_train)
         self.average_training_time = (time.time() - start_time)
 
+        if self.save:
+            if os.path.exists(self.output_directory + '/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl'):
+                os.remove(self.output_directory + '/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl')
 
-        if os.path.exists('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl'):
-            os.remove('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl')
+            print('...Saving model...')
+            with open(self.output_directory + '/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl', 'wb') as f:
+                pickle.dump(self.model, f)
+            print('...Model Saved...') # pourquoi aussi long de saver le modèle?
 
-        # print('...Saving model...')
-        # with open('./tmp/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl', 'wb') as f:
-        #     pickle.dump(self.model, f)
-        # print('...Model Saved...') # pourquoi aussi long de saver le modèle?
-
-    def train_tree(self,X_train,y_train):
+    def train_tree(self, X_train, y_train):
         print('...Train...')
         start_time = time.time()
         self.model.fit(X_train, y_train)
         self.average_training_time = (time.time() - start_time)
 
-        if not os.path.exists('./tmp/models_saved'):
-            os.makedirs('./tmp/models_saved')
+        if not os.path.exists(self.output_directory + '/models_saved'):
+            os.makedirs(self.output_directory + '/models_saved')
 
-        return self.model
+        if os.path.exists(self.output_directory + '/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl'):
+            os.remove(self.output_directory + '/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl')
+
+        print('...Saving model...')
+        with open(self.output_directory + '/models_saved/'+self.model_name+'?p='+str(self.params)+'.pkl', 'wb') as f:
+            pickle.dump(self.model, f)
+        print('...Model Saved...') # pourquoi aussi long de saver le modèle?
+
 
     def predict(self):
-        with open('./tmp/models_saved/classes.json', 'rb') as f:
+        with open(self.output_directory + '/models_saved/classes.json', 'rb') as f:
             classes = json.load(f)
             self.target_names = [labels for key, labels in classes.items()]
 
         for i in range(len(self.target_names)):
-            self.target_names[i] = self.target_names[i].encode('utf-8')
+            try:
+                self.target_names[i] = self.target_names[i].encode('utf-8')
+            except:
+                self.target_names[i] = str(self.target_names[i]).encode('utf-8')
 
 
         self.pred = self.model.predict(self.X_val)
         self.accuracy = accuracy_score(self.y_val, self.pred)
-        #self.confusion_matrix = np.array(confusion_matrix(self.y_val, self.pred), dtype=float)
-        #self.classification_report = classification_report(self.y_val, self.pred, target_names=self.target_names)
-        #print(self.pred)
+
+        self.confusion_matrix = np.array(confusion_matrix(self.y_val, self.pred), dtype=float)
+        self.classification_report = classification_report(self.y_val, self.pred, target_names=self.target_names)
+        # print(self.pred)
         print('\n\n## FINISHED ##')
-        print('\nresult for the ' + self.model_name + ' on validation set:')
-        #print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage_training_time:', self.average_training_time, '\nclassification report', self.classification_report)
-        print('accuracy:',self.accuracy,'\naverage_training_time:',self.average_training_time)
-        return [self.accuracy,self.average_training_time]
+        print('\nresult for the ' + self.model_name + ' with parameters ' + str(self.params) + ' on validation set:')
+        print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage_training_time:', self.average_training_time, '\nclassification report', self.classification_report)
+        return self.accuracy
 
 
 if __name__ == '__main__':

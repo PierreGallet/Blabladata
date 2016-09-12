@@ -20,9 +20,10 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 class tfidf():
 
-    def __init__(self):
-        if not os.path.exists('./tmp'):
-            os.makedirs('./tmp')
+    def __init__(self, output_directory):
+        self.output_directory = output_directory
+        if not os.path.exists(self.output_directory):
+            os.makedirs(self.output_directory)
         if not os.path.exists('./data/inputs/tfidf'):
             os.makedirs('./data/inputs/tfidf')
 
@@ -40,7 +41,7 @@ class tfidf():
         #vectorizer = TfidfVectorizer(encoding='utf8',ngram_range=(2,2),min_df=3)
         vectorizer.fit(corpus)
 
-        with open('./tmp/tfidf.pkl', 'wb') as f:
+        with open(self.output_directory + '/tfidf.pkl', 'wb') as f:
             pickle.dump(vectorizer, f)
 
         print('...train tfidf ended')
@@ -65,7 +66,7 @@ class tfidf():
         self.path_labels_output = './data/inputs/tfidf/labels.npy'
 
         # we load the tfidf vectorizer
-        with open('./tmp/tfidf.pkl', 'rb') as f:
+        with open(self.output_directory + '/tfidf.pkl', 'rb') as f:
             vectorizer = pickle.load(f)
         # we load the sentences data
         def myCorpus():
@@ -90,11 +91,14 @@ class tfidf():
                 labels[i] = int(line)
                 i += 1
 
-        print("saving formated input")
-        with open(self.path_sentences_output, 'wb') as f:
-            np.save(f, sentences)
-        with open(self.path_labels_output, 'wb') as f:
-            np.save(f, labels)
+        ### WAY TOO LONG FOR BIG DATA (so we don)
+        # print("saving formated input")
+        # with open(self.path_sentences_output, 'wb') as f:
+        #     np.save(f, sentences)
+        # with open(self.path_labels_output, 'wb') as f:
+        #     np.save(f, labels)
+
+
 
         print('shape of sentences', sentences.shape)
         print('shape of labels', labels.shape)
@@ -114,7 +118,7 @@ class tfidf():
         self.path_labels_output_3='./data/inputs/tfidf/labels_3.npy'
 
         # we load the tfidf vectorizer
-        with open('./tmp/tfidf.pkl', 'rb') as f:
+        with open(self.output_directory + '/tfidf.pkl', 'rb') as f:
             vectorizer = pickle.load(f)
         # we load the sentences data
         def myCorpus():

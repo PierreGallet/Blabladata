@@ -20,6 +20,7 @@ from sklearn.cross_validation import train_test_split, StratifiedKFold
 import pickle, time, unicodedata
 import matplotlib.pyplot as plt
 import os, json
+from keras.utils.np_utils import to_categorical
 np.random.seed(1337)  # for reproducibility
 np.set_printoptions(suppress=True)
 np.set_printoptions(threshold='nan')
@@ -27,7 +28,9 @@ np.set_printoptions(threshold='nan')
 
 class deep_learning():
 
-    def __init__(self, rnn=True):
+    def __init__(self, output_directory, rnn=True, save=True):
+        self.save = save
+        self.output_directory = output_directory
         self.rnn = rnn
         if rnn == True:
             self.path_sentences = './data/inputs/word2vec/sentences.npy'
@@ -35,7 +38,7 @@ class deep_learning():
         else:
             self.path_sentences = './data/inputs/tfidf/sentences.npy'
             self.path_labels = './data/inputs/tfidf/labels.npy'
-        with open('./tmp/models_saved/classes.json', 'rb') as f:
+        with open(self.output_directory + '/models_saved/classes.json', 'rb') as f:
             classes = json.load(f)
             self.target_names = [labels for key, labels in classes.items()]
             self.number_of_classes = len(self.target_names)
@@ -50,8 +53,8 @@ class deep_learning():
                 X_train, X_val, y_train, y_val = train_test_split(sentences, labels, test_size=test_size, random_state=1000)
         self.X_train = X_train
         self.X_val = X_val
-        self.y_train = y_train
-        self.y_val = y_val
+        self.y_train = to_categorical(y_train)
+        self.y_val = to_categorical(y_val)
         print(len(self.X_train), 'train sequences')
         print(len(self.X_val), 'validation sequences')
 
@@ -68,7 +71,7 @@ class deep_learning():
     def build_cnn_lstm(self, max_len=100, filter_length=3, nb_filter=64, pool_length=2, lstm_output_size=70):
 
         print('...Build model...')
-        with open('./tmp/embedding_weights.pk', 'rb') as weights_pk:
+        with open(self.output_directory + '/embedding_weights.pk', 'rb') as weights_pk:
             self.embedding_weights = np.array(pickle.load(weights_pk))   # size = voc_dim x emb_dim
             # print(weights[:10])
         self.voc_dim, self.emb_dim = self.embedding_weights.shape
@@ -92,7 +95,7 @@ class deep_learning():
     def build_bilstm(self, max_len=100, lstm_output_size=70):
 
         print('...Build model...')
-        with open('./tmp/embedding_weights.pk', 'rb') as weights_pk:
+        with open(self.output_directory + '/embedding_weights.pk', 'rb') as weights_pk:
             self.embedding_weights = np.array(pickle.load(weights_pk))   # size = voc_dim x emb_dim
             # print(weights[:10])
         self.voc_dim, self.emb_dim = self.embedding_weights.shape
@@ -137,35 +140,37 @@ class deep_learning():
         self.history = self.model.fit(self.X_train, self.y_train, batch_size=self.batch_size, nb_epoch=self.nb_epoch, validation_data=(self.X_val, self.y_val), verbose=2)
         self.average_time_per_epoch = (time.time() - start_time) / self.nb_epoch
 
-        print('...Saving model...')
+        if self.save:
+            print('...Saving model...')
 
-        if not os.path.exists('./tmp/models_saved'):
-            os.makedirs('./tmp/models_saved')
+            if not os.path.exists(self.output_directory + '/models_saved'):
+                os.makedirs(self.output_directory + '/models_saved')
 
-        if os.path.exists('./tmp/models_saved/cnn_lstm_weights.h5'):
-            os.remove('./tmp/models_saved/cnn_lstm_weights.h5')
-        if os.path.exists('./tmp/models_saved/cnn_lstm.json'):
-            os.remove('./tmp/models_saved/cnn_lstm.json')
+            if os.path.exists(self.output_directory + '/models_saved/cnn_lstm_weights.h5'):
+                os.remove(self.output_directory + '/models_saved/cnn_lstm_weights.h5')
 
-        try:
-            print('starting saving weights')
-            self.model.save_weights('./tmp/models_saved/cnn_lstm_weights.h5')
-            print('ending saving weights')
-            model_saved = self.model.to_json()
-            with open('./tmp/models_saved/cnn_lstm.json', 'w+') as f:
-                print('starting saving model')
-                f.write(model_saved)
-                print('ending saving model')
-        except:
-            print('could not save the model')
-            pass
+            try:
+                # print('starting saving model')
+                # self.model.save(self.output_directory + '/models_saved/cnn_lstm.h5')
+                # print('ending saving model')
+                print('starting saving weights')
+                self.model.save_weights(self.output_directory + '/models_saved/cnn_lstm_weights.h5')
+                print('ending saving weights')
+                model_saved = self.model.to_json()
+                with open(self.output_directory + '/models_saved/cnn_lstm.json', 'w+') as f:
+                    print('starting saving model')
+                    f.write(model_saved)
+                    print('ending saving model')
+            except:
+                print('could not save the model')
+                pass
 
 
     def predict(self):
 
         # compute prediction on validation set
         self.pred = self.model.predict(self.X_val, batch_size=self.batch_size)
-
+        print(self.model.predict([0,1,2,3,4], batch_size=self.batch_size))
         # transform the prediction matrix into a vector with labels indexes
         print(self.pred[:5])
         self.pred_vector = np.zeros(self.pred.shape[0])
@@ -185,7 +190,10 @@ class deep_learning():
         print(self.y_val_vector)
 
         for i in range(len(self.target_names)):
-            self.target_names[i] = self.target_names[i].encode('utf-8')
+            try:
+                self.target_names[i] = self.target_names[i].encode('utf-8')
+            except:
+                self.target_names[i] = str(self.target_names[i]).encode('utf-8')
 
         self.accuracy = accuracy_score(self.y_val_vector, self.pred_vector)
         self.confusion_matrix = np.array(confusion_matrix(self.y_val_vector, self.pred_vector), dtype=float)
@@ -201,7 +209,7 @@ class deep_learning():
         print('accuracy:', self.accuracy, '\nconfusion matrix:\n', self.confusion_matrix, '\naverage time per epoch:', self.average_time_per_epoch)
         print('\nadditional metrics:')
         print('history:', self.history.history, '\nclassification report:', self.classification_report)
-
+        return self.accuracy
 
     def test(self):
         #TODO: rendre fonctionnelle la partie test sur unseen data

@@ -30,12 +30,13 @@ class word2vec():
     # format_input: to format sentence.txt / label.txt files where one sentence = one label = one line, that are in the working_directory/input folder.
     """
 
-    def __init__(self):
+    def __init__(self, output_directory):
         """
         directory is the working directory where will be stored the templates & models & dictionary & others matrix
         """
-        if not os.path.exists('./tmp'):
-            os.makedirs('./tmp')
+        self.output_directory = output_directory
+        if not os.path.exists(self.output_directory):
+            os.makedirs(self.output_directory )
 
     def train(self, path_sentences, size=128, window=5, min_count=10):
         """
@@ -43,7 +44,7 @@ class word2vec():
         """
         sentences = LineSentence(path_sentences)
         model = Word2Vec(sentences, size=size, window=window, min_count=min_count)
-        model.save('./tmp/word2vec')
+        model.save(self.output_directory + '/word2vec')
         print('...word2vec training ended')
         return model
 
@@ -53,7 +54,7 @@ class word2vec():
         and the word - word vector dictionary
         """
 
-        model = Word2Vec.load('./tmp/word2vec')
+        model = Word2Vec.load(self.output_directory + '/word2vec')
         index2word = model.index2word
         index_dict = {}
         word_vectors = {}
@@ -61,9 +62,9 @@ class word2vec():
         for word in index2word:
             index_dict[word] = index2word.index(word) + 1  # +1 to use index 0 as the unknown token or no token index
             word_vectors[word] = model[word]
-        with open('./tmp/index_dict.pk', 'wb') as f:
+        with open(self.output_directory + '/index_dict.pk', 'wb') as f:
             pickle.dump(index_dict, f)
-        with open('./tmp/word_vectors.pk', 'wb') as f:
+        with open(self.output_directory + '/word_vectors.pk', 'wb') as f:
             pickle.dump(word_vectors, f)
 
         print('lenght of dictionary (voc_dim):', len(index_dict))
@@ -74,13 +75,13 @@ class word2vec():
         self.index_dict = index_dict
         self.word_vectors = word_vectors
 
-        model = Word2Vec.load('./tmp/word2vec')
+        model = Word2Vec.load(self.output_directory + '/word2vec')
         emb_dim = model.vector_size
         voc_dim = len(self.index_dict)
         embedding_weights = np.zeros((voc_dim + 1, emb_dim))  # +1 to use index 0 as the unknown token or no token index
         for word, index in self.index_dict.items():
             embedding_weights[index, :] = self.word_vectors[word]
-        with open('./tmp/embedding_weights.pk', 'wb') as f:
+        with open(self.output_directory + '/embedding_weights.pk', 'wb') as f:
             pickle.dump(embedding_weights, f)
         print('shape of embedding weight matrix (voc_dim + 1, emb_dim):', embedding_weights.shape)
         return embedding_weights
