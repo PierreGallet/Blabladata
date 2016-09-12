@@ -97,6 +97,7 @@ class preprocessing():
         # for paraphrase detection
         self.path_sentences_1 = self.new_directory+'/sentences_1.txt'
         self.path_sentences_2 = self.new_directory+'/sentences_2.txt'
+
         try:
             self.raw_data = pd.read_csv(self.data_directory, sep=';')
         except:
@@ -148,24 +149,21 @@ class preprocessing():
         with open(self.path_sentences, 'w+') as sentences:
             with open(self.path_labels, 'w+') as labels:
                 with open(self.data_directory, 'rb') as f:
-                    reader = csv.DictReader(f, fieldnames=['label', 'sentence'], delimiter=';')
+                    reader = pd.read_csv(self.data_directory, sep=';')
                     if word_label == True:
                         label_index = self.label_indexing()
                     i = 0
-                    for row in reader:
+                    for index,row in reader.iterrows():
                         if row['sentence']=='' or row['label']=='':
                             pass
                         else:
-                            if i == 0:
-                                i += 1
+                            txt = parse(row['sentence'])
+                            if word_label == True:
+                                label = label_index[row['label']]
                             else:
-                                txt = parse(row['sentence'])
-                                if word_label == True:
-                                    label = label_index[row['label']]
-                                else:
-                                    label = row['label']
-                                sentences.write(txt+'\n')
-                                labels.write(str(label)+'\n')
+                                label = row['label']
+                            sentences.write(txt+'\n')
+                            labels.write(str(label)+'\n')
         print('number of classes:', self.get_number_of_classes())
         print('classes names:')
         target_names = self.get_classes_names()  # here we save classes into the json

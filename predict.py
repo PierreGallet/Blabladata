@@ -20,8 +20,9 @@ def isin(list_of_elem, sentence):
 def create_output(sentence):
     # get named entities (aka parameters)
     context_ner = entities(sentence)
-    sentence = parse_soft(sentence)
-
+    #sentence = parse_soft(sentence)
+    sentence = parse(sentence)
+    
     # get intent
     greetingPattern = re.compile(r'((.)?onjour|b(.)?njour|bo(.)?jour|bon(.)?our|bonj(.)?ur|bonjo(.)?r|bonjou(.)?)|(.)?ello|(.)?alut')
     thanksPattern = re.compile(r'((.)?erci|mercis|thanks|thank you|thank)')
@@ -31,21 +32,7 @@ def create_output(sentence):
     elif len(sentence) < 25 and re.search(thanksPattern, sentence) is not None:
         intents = ['thanks']
         intents, acc, comprehension = intents, [1], True
-    # elif isin(['sfr presse', 'presse', 'SFR presse', 'SFR Presse'], sentence):
-    #     intents = ['SFR Presse']
-    #     intents, acc, comprehension = intents, [1], True
-    # elif isin(['desa', 'arret', 'resil', 'sup', 'stop', 'annul', 'remb'], sentence):
-    #     intents = ['resiliation']
-    #     intents, acc, comprehension = intents, [1], True
-    # elif isin(['augm', 'forf', 'fact', 'euro', 'mobile'], sentence):
-    #     intents = ['plainte_augmentation_facture']
-    #     intents, acc, comprehension = intents, [1], True
-    # elif isin(['info', 'explica', 'precis', 'est quoi', 'detail', 'doc'], sentence):
-    #     intents = ['demande_info']
-    #     intents, acc, comprehension = intents, [1], True
-    # elif isin(['anc', 'part', 'concu', 'avant', 'inaccept', 'chang', 'prix', 'recup'], sentence):
-    #     intents = ['pas_content_aug_for']
-    #     intents, acc, comprehension = intents, [1], True
+
     else:
         intents, acc, comprehension = intent(sentence)
 

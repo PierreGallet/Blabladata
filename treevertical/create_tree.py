@@ -21,7 +21,7 @@ class create_tree():
 
     def initialize_tree(self,num_nodes):
         for element in num_nodes:
-            node = list(self.nodes[element])
+            node = list(self.nodes[element-1])
             node.append({})
             self.tree[str(element)]= node
 
@@ -30,7 +30,7 @@ class create_tree():
         for element in place:
             nodes=nodes[str(element)][2]
         for element in num_nodes:
-            node = list(self.nodes[element])
+            node = list(self.nodes[element-1])
             node.append({})
             nodes[str(element)]= node
 
@@ -38,8 +38,8 @@ if __name__ == '__main__':
 
     test=create_tree()
     test.add_node_2([["intent a",'mess a'],["intent b", "mess b"],["intent c", "mess c"],["intent d", "mess d"]])
-    test.initialize_tree([0,1])
-    test.add_branches([2,3,1],[0])
-    test.add_branches([0,2],[0,2])
+    test.initialize_tree([1,2])
+    test.add_branches([3,4,2],[1])
+    test.add_branches([1,3],[1,3])
     print(test.nodes)
     print(test.tree)
